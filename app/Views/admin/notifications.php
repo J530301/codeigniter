@@ -44,7 +44,7 @@
 <!-- Main Content -->
 <div class="min-h-screen bg-gray-100">
     <!-- Top Navigation -->
-    <nav class="bg-white shadow-sm border-b border-gray-200">
+    <nav class="sticky top-0 z-40 bg-white shadow-sm border-b border-gray-200">
         <div class="px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16">
                 <div class="flex items-center">
@@ -55,6 +55,21 @@
                 </div>
                 
                 <div class="flex items-center space-x-4">
+                    <!-- Search Bar - Desktop -->
+                    <div class="hidden md:block relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-search text-gray-400"></i>
+                        </div>
+                        <input type="text" 
+                               id="searchInput" 
+                               placeholder="Search notifications..." 
+                               class="block w-64 pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                    </div>
+                    
+                    <!-- Search Icon - Mobile -->
+                    <button id="mobileSearchBtn" onclick="toggleMobileSearch()" class="md:hidden text-gray-600 hover:text-gray-800">
+                        <i class="fas fa-search text-xl"></i>
+                    </button>
                     <div class="relative">
                         <button id="profileButton" onclick="toggleProfileDropdown()" class="flex items-center text-gray-600 hover:text-gray-800">
                             <i class="fas fa-user-circle text-2xl"></i>
@@ -73,6 +88,24 @@
         </div>
     </nav>
 
+    <!-- Mobile Search Bar (hidden by default) -->
+    <div id="mobileSearchBar" class="hidden md:hidden bg-white border-b border-gray-200 px-4 py-3">
+        <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <i class="fas fa-search text-gray-400"></i>
+            </div>
+            <input type="text" 
+                   id="mobileSearchInput" 
+                   placeholder="Search notifications..." 
+                   class="block w-full pl-10 pr-10 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+            <div class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                <button onclick="toggleMobileSearch()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Page Content -->
     <main class="p-6">
         <div class="bg-white shadow rounded-lg">
@@ -85,7 +118,7 @@
                 </div>
             </div>
             
-            <div class="divide-y divide-gray-200">
+            <div class="divide-y divide-gray-200" id="notificationsContainer">
                 <?php if (empty($notifications)): ?>
                     <div class="p-8 text-center text-gray-500">
                         <i class="fas fa-bell text-4xl text-gray-300 mb-3"></i>
@@ -94,7 +127,7 @@
                     </div>
                 <?php else: ?>
                     <?php foreach ($notifications as $notification): ?>
-                        <div class="p-6 hover:bg-gray-50 <?= !$notification['is_read'] ? 'bg-blue-50' : '' ?>">
+                        <div class="notification-item p-6 hover:bg-gray-50 <?= !$notification['is_read'] ? 'bg-blue-50' : '' ?>">>
                             <div class="flex items-start">
                                 <div class="flex-shrink-0">
                                     <div class="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center">
@@ -161,6 +194,34 @@ function toggleSidebar() {
     sidebar.classList.toggle('active');
 }
 
+function toggleMobileSearch() {
+    const mobileSearchBar = document.getElementById('mobileSearchBar');
+    const mobileSearchInput = document.getElementById('mobileSearchInput');
+    
+    if (mobileSearchBar.classList.contains('hidden')) {
+        mobileSearchBar.classList.remove('hidden');
+        mobileSearchInput.focus();
+    } else {
+        mobileSearchBar.classList.add('hidden');
+        mobileSearchInput.value = '';
+        // Trigger search clear
+        filterNotifications('');
+    }
+}
+
+function filterNotifications(searchTerm) {
+    const notifications = document.querySelectorAll('.notification-item');
+    
+    notifications.forEach(notification => {
+        const text = notification.textContent.toLowerCase();
+        if (text.includes(searchTerm.toLowerCase()) || searchTerm === '') {
+            notification.style.display = '';
+        } else {
+            notification.style.display = 'none';
+        }
+    });
+}
+
 function toggleProfileDropdown() {
     const dropdown = document.getElementById('profileDropdown');
     dropdown.classList.toggle('hidden');
@@ -173,6 +234,24 @@ document.addEventListener('click', function(event) {
     
     if (!profileButton.contains(event.target) && !dropdown.contains(event.target)) {
         dropdown.classList.add('hidden');
+    }
+});
+
+// Add event listeners for search
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchInput');
+    const mobileSearchInput = document.getElementById('mobileSearchInput');
+    
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            filterNotifications(this.value);
+        });
+    }
+    
+    if (mobileSearchInput) {
+        mobileSearchInput.addEventListener('input', function() {
+            filterNotifications(this.value);
+        });
     }
 });
 

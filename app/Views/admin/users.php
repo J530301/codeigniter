@@ -48,6 +48,21 @@
                 </div>
                 
                 <div class="flex items-center space-x-4">
+                    <!-- Search Bar - Desktop -->
+                    <div class="hidden md:block relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-search text-gray-400"></i>
+                        </div>
+                        <input type="text" 
+                               id="searchInput" 
+                               placeholder="Search users..." 
+                               class="block w-64 pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+                    </div>
+                    
+                    <!-- Search Icon - Mobile -->
+                    <button id="mobileSearchBtn" onclick="toggleMobileSearch()" class="md:hidden text-gray-600 hover:text-gray-800">
+                        <i class="fas fa-search text-xl"></i>
+                    </button>
                     <!-- Notifications -->
                     <div class="relative">
                         <button id="notificationButton" onclick="toggleNotificationDropdown()" class="text-gray-600 hover:text-gray-800 relative">
@@ -91,6 +106,24 @@
         </div>
     </nav>
 
+    <!-- Mobile Search Bar (hidden by default) -->
+    <div id="mobileSearchBar" class="hidden md:hidden bg-white border-b border-gray-200 px-4 py-3">
+        <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <i class="fas fa-search text-gray-400"></i>
+            </div>
+            <input type="text" 
+                   id="mobileSearchInput" 
+                   placeholder="Search users..." 
+                   class="block w-full pl-10 pr-10 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 text-sm">
+            <div class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                <button onclick="toggleMobileSearch()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Page Content -->
     <main class="p-6">
         <?php if (session()->get('success')): ?>
@@ -122,7 +155,7 @@
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                         </tr>
                     </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
+                    <tbody id="usersTableBody" class="bg-white divide-y divide-gray-200">
                         <?php if (empty($users)): ?>
                             <tr>
                                 <td colspan="5" class="px-6 py-4 text-center text-gray-500">No users found</td>
@@ -197,7 +230,7 @@
             <?php else: ?>
                 <div class="space-y-4">
                     <?php foreach ($users as $user): ?>
-                        <div class="bg-white shadow rounded-lg p-4 border border-gray-200">
+                        <div class="mobile-user-card bg-white shadow rounded-lg p-4 border border-gray-200">
                             <!-- User Header -->
                             <div class="flex items-center justify-between mb-3">
                                 <div class="flex items-center">
@@ -264,4 +297,52 @@
         </div>
     </main>
 </div>
+
+<script>
+function toggleMobileSearch() {
+    const mobileSearchBar = document.getElementById('mobileSearchBar');
+    const mobileSearchInput = document.getElementById('mobileSearchInput');
+    
+    if (mobileSearchBar.classList.contains('hidden')) {
+        mobileSearchBar.classList.remove('hidden');
+        mobileSearchInput.focus();
+    } else {
+        mobileSearchBar.classList.add('hidden');
+        mobileSearchInput.value = '';
+        // Trigger search clear
+        filterUsers('');
+    }
+}
+
+function filterUsers(searchTerm) {
+    const users = document.querySelectorAll('#usersTableBody tr, .mobile-user-card');
+    
+    users.forEach(user => {
+        const text = user.textContent.toLowerCase();
+        if (text.includes(searchTerm.toLowerCase()) || searchTerm === '') {
+            user.style.display = '';
+        } else {
+            user.style.display = 'none';
+        }
+    });
+}
+
+// Add event listeners for search
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchInput');
+    const mobileSearchInput = document.getElementById('mobileSearchInput');
+    
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            filterUsers(this.value);
+        });
+    }
+    
+    if (mobileSearchInput) {
+        mobileSearchInput.addEventListener('input', function() {
+            filterUsers(this.value);
+        });
+    }
+});
+</script>
 <?= $this->endSection() ?>
