@@ -129,11 +129,12 @@
 
         <!-- Recent Bills -->
         <div class="bg-white shadow rounded-lg">
-            <div class="px-6 py-4 border-b border-gray-200">
+            <div class="px-4 sm:px-6 py-4 border-b border-gray-200">
                 <h3 class="text-lg font-medium text-gray-900">Recent Bills</h3>
             </div>
             
-            <div class="overflow-x-auto">
+            <!-- Desktop Table View -->
+            <div class="hidden md:block overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr>
@@ -143,7 +144,7 @@
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
                         </tr>
                     </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
+                    <tbody class="bg-white divide-y divide-gray-200" id="recentBillsTableBody">
                         <?php if (empty($bills)): ?>
                             <tr>
                                 <td colspan="4" class="px-6 py-4 text-center text-gray-500">
@@ -152,7 +153,7 @@
                             </tr>
                         <?php else: ?>
                             <?php foreach (array_slice($bills, 0, 5) as $bill): ?>
-                                <tr>
+                                <tr class="recent-bill-row">
                                     <td class="px-6 py-4">
                                         <div class="text-sm text-gray-900 font-medium"><?= htmlspecialchars($bill['item_name']) ?></div>
                                         <?php if (!empty($bill['description'])): ?>
@@ -193,8 +194,67 @@
                 </table>
             </div>
             
+            <!-- Mobile Card View -->
+            <div class="md:hidden" id="recentBillsCardContainer">
+                <?php if (empty($bills)): ?>
+                    <div class="p-6 text-center text-gray-500">
+                        <div class="flex flex-col items-center">
+                            <i class="fas fa-file-invoice text-3xl text-gray-300 mb-2"></i>
+                            <p class="text-sm mb-2">No bills found</p>
+                            <a href="/user/create-bill" class="text-indigo-600 hover:text-indigo-500 text-sm">Create your first bill</a>
+                        </div>
+                    </div>
+                <?php else: ?>
+                    <div class="divide-y divide-gray-200">
+                        <?php foreach (array_slice($bills, 0, 5) as $bill): ?>
+                            <div class="p-4 recent-bill-card">
+                                <div class="flex items-start justify-between mb-2">
+                                    <div class="flex items-center">
+                                        <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full 
+                                            <?php
+                                            switch($bill['status']) {
+                                                case 'pending':
+                                                    echo 'bg-yellow-100 text-yellow-800';
+                                                    break;
+                                                case 'approved':
+                                                    echo 'bg-green-100 text-green-800';
+                                                    break;
+                                                case 'rejected':
+                                                    echo 'bg-red-100 text-red-800';
+                                                    break;
+                                                default:
+                                                    echo 'bg-gray-100 text-gray-800';
+                                            }
+                                            ?>">
+                                            <?= ucfirst($bill['status']) ?>
+                                        </span>
+                                    </div>
+                                    <div class="text-right">
+                                        <div class="text-xs text-gray-500"><?= date('M j, Y', strtotime($bill['created_at'])) ?></div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-2">
+                                    <h4 class="text-sm font-medium text-gray-900 mb-1"><?= htmlspecialchars($bill['item_name']) ?></h4>
+                                    <?php if (!empty($bill['description'])): ?>
+                                        <p class="text-xs text-gray-600"><?= htmlspecialchars(substr($bill['description'], 0, 80)) ?><?= strlen($bill['description']) > 80 ? '...' : '' ?></p>
+                                    <?php endif; ?>
+                                </div>
+                                
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <div class="text-sm font-semibold text-gray-900">$<?= number_format($bill['total_amount'], 2) ?></div>
+                                        <div class="text-xs text-gray-500">Qty: <?= $bill['quantity'] ?></div>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
+            </div>
+            
             <?php if (count($bills) > 5): ?>
-                <div class="px-6 py-3 bg-gray-50 border-t border-gray-200">
+                <div class="px-4 sm:px-6 py-3 bg-gray-50 border-t border-gray-200">
                     <a href="/user/bills" class="text-sm text-indigo-600 hover:text-indigo-500">
                         View all <?= count($bills) ?> bills →
                     </a>
@@ -203,4 +263,23 @@
         </div>
     </main>
 </div>
+
+<script>
+function toggleProfileDropdown() {
+    const dropdown = document.getElementById('profileDropdown');
+    dropdown.classList.toggle('hidden');
+    
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(event) {
+        const profileButton = document.getElementById('profileButton');
+        if (!profileButton.contains(event.target) && !dropdown.contains(event.target)) {
+            dropdown.classList.add('hidden');
+        }
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // No additional functionality needed for recent bills section
+});
+</script>
 <?= $this->endSection() ?>
