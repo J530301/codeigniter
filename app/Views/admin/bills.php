@@ -37,7 +37,7 @@
 <!-- Main Content -->
 <div class="min-h-screen bg-gray-100">
     <!-- Top Navigation -->
-    <nav class="bg-white shadow-sm border-b border-gray-200">
+    <nav class="sticky top-0 z-40 bg-white shadow-sm border-b border-gray-200">
         <div class="px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16">
                 <div class="flex items-center">
@@ -57,7 +57,7 @@
                             </span>
                         </button>
                         
-                        <div id="notificationDropdown" class="hidden absolute right-0 mt-2 w-80 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-10">
+                        <div id="notificationDropdown" class="hidden absolute right-0 mt-2 w-80 max-w-sm bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-50">
                             <div class="py-1">
                                 <div class="px-4 py-3 border-b border-gray-200">
                                     <h3 class="text-sm font-medium text-gray-900">Notifications</h3>
@@ -66,7 +66,7 @@
                                     <!-- Notifications will be loaded here -->
                                 </div>
                                 <div class="px-4 py-3 border-t border-gray-200">
-                                    <a href="/admin/notifications" class="text-sm text-indigo-600 hover:text-indigo-500">View all notifications</a>
+                                    <a href="/admin/notifications" class="text-sm text-indigo-600 hover:text-indigo-500 block text-center">View all notifications</a>
                                 </div>
                             </div>
                         </div>
@@ -105,7 +105,8 @@
             </div>
         <?php endif; ?>
 
-        <div class="bg-white shadow rounded-lg">
+        <!-- Desktop Table View (hidden on mobile) -->
+        <div class="bg-white shadow rounded-lg hidden md:block">
             <div class="px-6 py-4 border-b border-gray-200">
                 <h3 class="text-lg font-medium text-gray-900">Bills Management</h3>
             </div>
@@ -223,6 +224,128 @@
                     </tbody>
                 </table>
             </div>
+        </div>
+
+        <!-- Mobile Card View (visible only on mobile) -->
+        <div class="block md:hidden">
+            <div class="bg-white shadow rounded-lg mb-4 p-4">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Bills Management</h3>
+            </div>
+            
+            <?php if (empty($bills)): ?>
+                <div class="bg-white shadow rounded-lg p-6">
+                    <div class="text-center text-gray-500">No bills found</div>
+                </div>
+            <?php else: ?>
+                <div class="space-y-4">
+                    <?php foreach ($bills as $bill): ?>
+                        <div class="bg-white shadow rounded-lg p-4 border border-gray-200">
+                            <!-- Bill Header -->
+                            <div class="flex justify-between items-start mb-3">
+                                <div class="text-lg font-semibold text-gray-900">
+                                    Bill #<?= $bill['id'] ?>
+                                </div>
+                                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full 
+                                    <?= $bill['status'] === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
+                                        ($bill['status'] === 'approved' ? 'bg-green-100 text-green-800' : 
+                                        ($bill['status'] === 'rejected' ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-800')) ?>">
+                                    <?= ucfirst($bill['status']) ?>
+                                </span>
+                            </div>
+                            
+                            <!-- User Information -->
+                            <div class="mb-3 pb-3 border-b border-gray-100">
+                                <div class="text-sm font-medium text-gray-500 uppercase tracking-wider mb-1">Customer</div>
+                                <div class="flex items-center">
+                                    <div class="flex-shrink-0 h-8 w-8 mr-3">
+                                        <div class="h-8 w-8 rounded-full bg-indigo-100 flex items-center justify-center">
+                                            <i class="fas fa-user text-indigo-600 text-sm"></i>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div class="text-sm font-medium text-gray-900">
+                                            <?= htmlspecialchars($bill['first_name'] . ' ' . $bill['last_name']) ?>
+                                        </div>
+                                        <div class="text-xs text-gray-500"><?= htmlspecialchars($bill['email']) ?></div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Item Information -->
+                            <div class="mb-3 pb-3 border-b border-gray-100">
+                                <div class="text-sm font-medium text-gray-500 uppercase tracking-wider mb-1">Item</div>
+                                <div class="text-sm font-medium text-gray-900"><?= htmlspecialchars($bill['item_name']) ?></div>
+                                <?php if (!empty($bill['description'])): ?>
+                                    <div class="text-xs text-gray-500 mt-1"><?= htmlspecialchars($bill['description']) ?></div>
+                                <?php endif; ?>
+                            </div>
+                            
+                            <!-- Amount & Date -->
+                            <div class="grid grid-cols-2 gap-4 mb-3 pb-3 border-b border-gray-100">
+                                <div>
+                                    <div class="text-sm font-medium text-gray-500 uppercase tracking-wider mb-1">Amount</div>
+                                    <div class="text-lg font-bold text-gray-900">$<?= number_format($bill['total_amount'], 2) ?></div>
+                                    <div class="text-xs text-gray-500">Qty: <?= $bill['quantity'] ?></div>
+                                </div>
+                                <div>
+                                    <div class="text-sm font-medium text-gray-500 uppercase tracking-wider mb-1">Date</div>
+                                    <div class="text-sm text-gray-900"><?= date('M j, Y', strtotime($bill['created_at'])) ?></div>
+                                    <div class="text-xs text-gray-500"><?= date('g:i A', strtotime($bill['created_at'])) ?></div>
+                                </div>
+                            </div>
+                            
+                            <!-- Action Buttons -->
+                            <div class="pt-2">
+                                <?php if ($bill['status'] === 'pending'): ?>
+                                    <div class="space-y-2">
+                                        <div class="grid grid-cols-2 gap-2">
+                                            <a href="/admin/bills/approve/<?= $bill['id'] ?>" 
+                                               class="inline-flex items-center justify-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 transition-colors"
+                                               onclick="return confirm('Are you sure you want to approve this bill?')">
+                                                <i class="fas fa-check mr-2"></i>Approve
+                                            </a>
+                                            <a href="/admin/bills/reject/<?= $bill['id'] ?>" 
+                                               class="inline-flex items-center justify-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 transition-colors"
+                                               onclick="return confirm('Are you sure you want to reject this bill?')">
+                                                <i class="fas fa-times mr-2"></i>Reject
+                                            </a>
+                                        </div>
+                                        <a href="/admin/bills/delete/<?= $bill['id'] ?>" 
+                                           class="w-full inline-flex items-center justify-center px-3 py-2 border border-red-300 text-sm font-medium rounded-md text-red-700 bg-white hover:bg-red-50 transition-colors"
+                                           onclick="return confirm('Are you sure you want to delete this bill? This action cannot be undone.')">
+                                            <i class="fas fa-trash mr-2"></i>Delete Bill
+                                        </a>
+                                    </div>
+                                <?php else: ?>
+                                    <div class="space-y-2">
+                                        <div class="flex items-center justify-center p-2 rounded-md 
+                                            <?php
+                                            switch($bill['status']) {
+                                                case 'approved':
+                                                    echo 'bg-green-50 text-green-700';
+                                                    break;
+                                                case 'rejected':
+                                                    echo 'bg-red-50 text-red-700';
+                                                    break;
+                                                default:
+                                                    echo 'bg-gray-50 text-gray-700';
+                                            }
+                                            ?>">
+                                            <i class="fas fa-<?= $bill['status'] === 'approved' ? 'check-circle' : 'times-circle' ?> mr-2"></i>
+                                            <span class="text-sm font-medium"><?= ucfirst($bill['status']) ?></span>
+                                        </div>
+                                        <a href="/admin/bills/delete/<?= $bill['id'] ?>" 
+                                           class="w-full inline-flex items-center justify-center px-3 py-2 border border-red-300 text-sm font-medium rounded-md text-red-700 bg-white hover:bg-red-50 transition-colors"
+                                           onclick="return confirm('Are you sure you want to delete this bill? This action cannot be undone.')">
+                                            <i class="fas fa-trash mr-2"></i>Delete Bill
+                                        </a>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
         </div>
     </main>
 </div>

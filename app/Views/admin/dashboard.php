@@ -139,7 +139,7 @@
                             </span>
                         </button>
                         
-                        <div id="notificationDropdown" class="hidden absolute right-0 mt-2 w-80 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-10">
+                        <div id="notificationDropdown" class="hidden absolute right-0 mt-2 w-80 max-w-sm bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-50">
                             <div class="py-1">
                                 <div class="px-4 py-3 border-b border-gray-200">
                                     <h3 class="text-sm font-medium text-gray-900">Notifications</h3>
@@ -148,7 +148,7 @@
                                     <!-- Notifications will be loaded here -->
                                 </div>
                                 <div class="px-4 py-3 border-t border-gray-200">
-                                    <a href="/admin/notifications" class="text-sm text-indigo-600 hover:text-indigo-500">View all notifications</a>
+                                    <a href="/admin/notifications" class="text-sm text-indigo-600 hover:text-indigo-500 block text-center">View all notifications</a>
                                 </div>
                             </div>
                         </div>

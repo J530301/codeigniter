@@ -37,7 +37,7 @@
 <!-- Main Content -->
 <div class="min-h-screen bg-gray-100">
     <!-- Top Navigation -->
-    <nav class="bg-white shadow-sm border-b border-gray-200">
+    <nav class="sticky top-0 z-40 bg-white shadow-sm border-b border-gray-200">
         <div class="px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16">
                 <div class="flex items-center">
@@ -57,7 +57,7 @@
                             </span>
                         </button>
                         
-                        <div id="notificationDropdown" class="hidden absolute right-0 mt-2 w-80 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-10">
+                        <div id="notificationDropdown" class="hidden absolute right-0 mt-2 w-80 max-w-sm bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-50">
                             <div class="py-1">
                                 <div class="px-4 py-3 border-b border-gray-200">
                                     <h3 class="text-sm font-medium text-gray-900">Notifications</h3>
@@ -66,7 +66,7 @@
                                     <!-- Notifications will be loaded here -->
                                 </div>
                                 <div class="px-4 py-3 border-t border-gray-200">
-                                    <a href="/admin/notifications" class="text-sm text-indigo-600 hover:text-indigo-500">View all notifications</a>
+                                    <a href="/admin/notifications" class="text-sm text-indigo-600 hover:text-indigo-500 block text-center">View all notifications</a>
                                 </div>
                             </div>
                         </div>
@@ -105,7 +105,8 @@
             </div>
         <?php endif; ?>
 
-        <div class="bg-white shadow rounded-lg">
+        <!-- Desktop Table View (hidden on mobile) -->
+        <div class="bg-white shadow rounded-lg hidden md:block">
             <div class="px-6 py-4 border-b border-gray-200">
                 <h3 class="text-lg font-medium text-gray-900">User Management</h3>
             </div>
@@ -181,6 +182,85 @@
                     </tbody>
                 </table>
             </div>
+        </div>
+
+        <!-- Mobile Card View (visible only on mobile) -->
+        <div class="block md:hidden">
+            <div class="bg-white shadow rounded-lg mb-4 p-4">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">User Management</h3>
+            </div>
+            
+            <?php if (empty($users)): ?>
+                <div class="bg-white shadow rounded-lg p-6">
+                    <div class="text-center text-gray-500">No users found</div>
+                </div>
+            <?php else: ?>
+                <div class="space-y-4">
+                    <?php foreach ($users as $user): ?>
+                        <div class="bg-white shadow rounded-lg p-4 border border-gray-200">
+                            <!-- User Header -->
+                            <div class="flex items-center justify-between mb-3">
+                                <div class="flex items-center">
+                                    <div class="flex-shrink-0 h-12 w-12 mr-3">
+                                        <div class="h-12 w-12 rounded-full bg-indigo-100 flex items-center justify-center">
+                                            <i class="fas fa-user text-indigo-600 text-lg"></i>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div class="text-lg font-semibold text-gray-900">
+                                            <?= htmlspecialchars($user['first_name'] . ' ' . $user['last_name']) ?>
+                                        </div>
+                                        <div class="text-sm text-gray-500">@<?= htmlspecialchars($user['username']) ?></div>
+                                    </div>
+                                </div>
+                                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full 
+                                    <?= $user['status'] === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' ?>">
+                                    <?= ucfirst($user['status']) ?>
+                                </span>
+                            </div>
+                            
+                            <!-- Contact Information -->
+                            <div class="mb-3 pb-3 border-b border-gray-100">
+                                <div class="text-sm font-medium text-gray-500 uppercase tracking-wider mb-1">Contact</div>
+                                <div class="text-sm text-gray-900"><?= htmlspecialchars($user['email']) ?></div>
+                            </div>
+                            
+                            <!-- Account Details -->
+                            <div class="mb-3 pb-3 border-b border-gray-100">
+                                <div class="text-sm font-medium text-gray-500 uppercase tracking-wider mb-1">Account Created</div>
+                                <div class="text-sm text-gray-900"><?= date('M j, Y', strtotime($user['created_at'])) ?></div>
+                                <div class="text-xs text-gray-500"><?= date('g:i A', strtotime($user['created_at'])) ?></div>
+                            </div>
+                            
+                            <!-- Action Buttons -->
+                            <div class="pt-2">
+                                <div class="space-y-2">
+                                    <div class="grid grid-cols-2 gap-2">
+                                        <a href="/admin/users/edit/<?= $user['id'] ?>" 
+                                           class="inline-flex items-center justify-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 transition-colors">
+                                            <i class="fas fa-edit mr-2"></i>Edit User
+                                        </a>
+                                        
+                                        <a href="/admin/users/toggle-status/<?= $user['id'] ?>" 
+                                           class="inline-flex items-center justify-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white 
+                                           <?= $user['status'] === 'active' ? 'bg-yellow-600 hover:bg-yellow-700' : 'bg-green-600 hover:bg-green-700' ?> transition-colors"
+                                           onclick="return confirm('Are you sure you want to <?= $user['status'] === 'active' ? 'deactivate' : 'activate' ?> this user?')">
+                                            <i class="fas fa-<?= $user['status'] === 'active' ? 'ban' : 'check' ?> mr-2"></i>
+                                            <?= $user['status'] === 'active' ? 'Deactivate' : 'Activate' ?>
+                                        </a>
+                                    </div>
+                                    
+                                    <a href="/admin/users/delete/<?= $user['id'] ?>" 
+                                       class="w-full inline-flex items-center justify-center px-3 py-2 border border-red-300 text-sm font-medium rounded-md text-red-700 bg-white hover:bg-red-50 transition-colors"
+                                       onclick="return confirm('Are you sure you want to delete this user? This action cannot be undone.')">
+                                        <i class="fas fa-trash mr-2"></i>Delete User
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
         </div>
     </main>
 </div>

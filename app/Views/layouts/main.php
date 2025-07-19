@@ -22,6 +22,30 @@
         .dropdown-content.active {
             max-height: 500px;
         }
+        
+        /* Mobile notification dropdown styles */
+        @media (max-width: 640px) {
+            #notificationDropdown {
+                position: fixed !important;
+                top: 4rem !important;
+                right: 0.5rem !important;
+                left: 0.5rem !important;
+                width: auto !important;
+                max-width: none !important;
+                z-index: 50 !important;
+            }
+            
+            #notificationDropdown .max-h-64 {
+                max-height: 50vh;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            #notificationDropdown {
+                right: 0.25rem !important;
+                left: 0.25rem !important;
+            }
+        }
     </style>
 </head>
 <body class="bg-gray-100">
@@ -64,7 +88,7 @@
                 .then(data => {
                     const container = document.getElementById('notificationContainer');
                     if (data.length === 0) {
-                        container.innerHTML = '<div class="p-4 text-gray-500 text-center">No new notifications</div>';
+                        container.innerHTML = '<div class="p-4 text-gray-500 text-center text-sm">No new notifications</div>';
                         return;
                     }
                     
@@ -79,17 +103,23 @@
                         }
                         
                         html += `
-                            <div class="p-4 border-b border-gray-200 hover:bg-gray-50 cursor-pointer" onclick="handleNotificationClick('${notification.type}', ${notification.id})">
-                                <div class="flex items-start">
-                                    <div class="flex-shrink-0 mr-3 mt-1">
-                                        <i class="${icon}"></i>
+                            <div class="p-3 border-b border-gray-200 hover:bg-gray-50 cursor-pointer" onclick="handleNotificationClick('${notification.type}', ${notification.id})">
+                                <div class="flex items-start space-x-3">
+                                    <div class="flex-shrink-0">
+                                        <div class="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center">
+                                            <i class="${icon} text-sm"></i>
+                                        </div>
                                     </div>
-                                    <div class="flex-1">
-                                        <p class="text-sm font-medium text-gray-900">${notification.title}</p>
-                                        <p class="text-sm text-gray-600">${notification.message}</p>
-                                        <p class="text-xs text-gray-400 mt-1">${new Date(notification.created_at).toLocaleString()}</p>
+                                    <div class="flex-1 min-w-0">
+                                        <div class="flex items-start justify-between">
+                                            <div class="flex-1 min-w-0">
+                                                <p class="text-sm font-medium text-gray-900 truncate">${notification.title}</p>
+                                                <p class="text-sm text-gray-600 break-words">${notification.message}</p>
+                                                <p class="text-xs text-gray-400 mt-1">${new Date(notification.created_at).toLocaleString()}</p>
+                                            </div>
+                                            ${!notification.is_read ? '<div class="w-2 h-2 bg-blue-500 rounded-full ml-2 mt-1 flex-shrink-0"></div>' : ''}
+                                        </div>
                                     </div>
-                                    ${!notification.is_read ? '<div class="w-2 h-2 bg-blue-500 rounded-full ml-2 mt-1"></div>' : ''}
                                 </div>
                             </div>
                         `;

@@ -51,7 +51,7 @@
                     <button onclick="toggleSidebar()" class="text-gray-600 hover:text-gray-800 mr-4">
                         <i class="fas fa-bars text-xl"></i>
                     </button>
-                    <h1 class="text-xl font-semibold text-gray-800"><?= $title ?></h1>
+                    <h1 class="text-lg sm:text-xl font-semibold text-gray-800"><?= $title ?></h1>
                 </div>
                 
                 <div class="flex items-center space-x-4">
@@ -156,6 +156,26 @@
 </div>
 
 <script>
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    sidebar.classList.toggle('active');
+}
+
+function toggleProfileDropdown() {
+    const dropdown = document.getElementById('profileDropdown');
+    dropdown.classList.toggle('hidden');
+}
+
+// Close profile dropdown when clicking outside
+document.addEventListener('click', function(event) {
+    const dropdown = document.getElementById('profileDropdown');
+    const profileButton = document.getElementById('profileButton');
+    
+    if (!profileButton.contains(event.target) && !dropdown.contains(event.target)) {
+        dropdown.classList.add('hidden');
+    }
+});
+
 function markAsRead(notificationId) {
     fetch(`/admin/api/notifications/mark-read/${notificationId}`, {
         method: 'POST',
