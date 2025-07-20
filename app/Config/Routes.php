@@ -6,11 +6,16 @@ use CodeIgniter\Router\RouteCollection;
  * @var RouteCollection $routes
  */
 
-// Default route - redirect to login
-$routes->get('/', 'AuthController::login');
-
 // Authentication routes
 $routes->group('', ['namespace' => 'App\Controllers'], function($routes) {
+    // Test routes for debugging
+    $routes->get('test', 'TestController::index');
+    $routes->get('test/dbTest', 'TestController::dbTest');
+    $routes->get('test/phpInfo', 'TestController::phpInfo');
+    
+    // Default route - redirect to login
+    $routes->get('/', 'AuthController::login');
+    
     $routes->get('login', 'AuthController::login');
     $routes->post('login', 'AuthController::loginProcess');
     $routes->get('register', 'AuthController::register');
