@@ -46,7 +46,9 @@
             .main-content {
                 position: relative;
                 width: 100%;
-                padding-bottom: 2rem;
+                padding-bottom: 4rem;
+                min-height: 100vh;
+                min-height: calc(100vh + 50px); /* Add extra height for mobile browsers */
             }
             
             /* Fix sidebar overlay on mobile */
@@ -62,6 +64,30 @@
             /* Prevent body scroll when sidebar is open */
             body.sidebar-open {
                 overflow: hidden;
+                position: fixed;
+                width: 100%;
+            }
+            
+            /* Ensure content extends beyond viewport */
+            main {
+                min-height: calc(100vh - 4rem);
+                padding-bottom: 6rem !important;
+            }
+        }
+        
+        /* Extra mobile styles for very small screens */
+        @media (max-width: 480px) {
+            .main-content {
+                min-height: calc(100vh + 100px); /* Even more extra height */
+            }
+            
+            main {
+                padding-bottom: 8rem !important;
+            }
+            
+            /* Add extra margin to Quick Actions on mobile */
+            .quick-actions-mobile {
+                margin-bottom: 4rem !important;
             }
         }
         
@@ -91,6 +117,18 @@
             /* Better mobile padding */
             .main-content {
                 padding: 0.5rem;
+            }
+        }
+        
+        /* Ensure smooth scrolling on all devices */
+        * {
+            scroll-behavior: smooth;
+        }
+        
+        /* Fix iOS Safari viewport issues */
+        @supports (-webkit-touch-callout: none) {
+            .main-content {
+                min-height: -webkit-fill-available;
             }
         }
     </style>

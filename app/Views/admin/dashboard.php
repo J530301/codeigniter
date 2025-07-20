@@ -181,7 +181,7 @@
     </nav>
 
     <!-- Page Content -->
-    <main class="p-4 sm:p-6 pb-20"> <!-- Add bottom padding for mobile -->
+    <main class="p-4 sm:p-6 pb-32 min-h-screen"> <!-- Increased bottom padding and add min-height -->
         <?php if (session()->get('success')): ?>
             <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
                 <span class="block sm:inline"><?= session()->get('success') ?></span>
@@ -262,7 +262,7 @@
         </div>
 
         <!-- Quick Actions -->
-        <div class="bg-white shadow rounded-lg p-4 sm:p-6">
+        <div class="bg-white shadow rounded-lg p-4 sm:p-6 quick-actions-mobile">
             <h3 class="text-lg font-medium text-gray-900 mb-4">Quick Actions</h3>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 <a href="/admin/users" class="flex items-center p-4 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors">
@@ -290,6 +290,9 @@
                 </a>
             </div>
         </div>
+        
+        <!-- Mobile scroll spacer - ensures content can be fully scrolled on mobile -->
+        <div class="block sm:hidden h-20"></div>
     </main>
 </div>
 <?= $this->endSection() ?>
