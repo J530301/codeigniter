@@ -72,9 +72,9 @@ class AuthController extends BaseController
 
             // Redirect based on role
             if ($user['role'] === 'admin') {
-                return redirect()->to('/admin/dashboard')->with('success', 'Welcome back, Admin!');
+                return redirect()->to(base_url('admin/dashboard'))->with('success', 'Welcome back, Admin!');
             } else {
-                return redirect()->to('/user/dashboard')->with('success', 'Welcome back!');
+                return redirect()->to(base_url('user/dashboard'))->with('success', 'Welcome back!');
             }
         } else {
             return redirect()->back()->with('error', 'Invalid username/email or password.');
@@ -84,7 +84,7 @@ class AuthController extends BaseController
     public function logout()
     {
         session()->destroy();
-        return redirect()->to('/login')->with('success', 'You have been logged out successfully.');
+        return redirect()->to(base_url('login'))->with('success', 'You have been logged out successfully.');
     }
 
     public function register()
