@@ -78,7 +78,7 @@ class TestController extends BaseController
                 // Try manual connection to get better error info
                 echo '<strong>Attempting manual connection test...</strong><br>';
                 try {
-                    $connString = "host={$config->default['hostname']} port={$config->default['port']} dbname={$config->default['database']} user={$config->default['username']} password={$config->default['password']}";
+                    $connString = "host={$config->default['hostname']} port={$config->default['port']} dbname={$config->default['database']} user={$config->default['username']} password={$config->default['password']} sslmode=require";
                     echo '- Connection string: ' . str_replace($config->default['password'], '[PASSWORD]', $connString) . '<br>';
                     
                     $manualConn = pg_connect($connString);
