@@ -23,8 +23,9 @@ class App extends BaseConfig
         parent::__construct();
         
         // Auto-detect base URL for production
-        if (ENVIRONMENT === 'production' && !empty($_SERVER['HTTP_HOST'])) {
-            $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https://' : 'http://';
+        if (ENVIRONMENT !== 'development' && !empty($_SERVER['HTTP_HOST'])) {
+            $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || 
+                       (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') ? 'https://' : 'http://';
             $this->baseURL = $protocol . $_SERVER['HTTP_HOST'] . '/';
         }
     }

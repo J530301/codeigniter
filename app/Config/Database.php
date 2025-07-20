@@ -175,13 +175,21 @@ class Database extends Config
         if ($databaseUrl) {
             $dbParts = parse_url($databaseUrl);
             
+            // Build DSN with SSL for Render
+            $dsn = sprintf(
+                'pgsql:host=%s;port=%d;dbname=%s;sslmode=require',
+                $dbParts['host'] ?? 'localhost',
+                $dbParts['port'] ?? 5432,
+                ltrim($dbParts['path'] ?? '', '/')
+            );
+            
             $this->default = [
-                'DSN'          => '', // Don't use DSN, use individual components
+                'DSN'          => $dsn, // Use DSN with SSL
                 'hostname'     => $dbParts['host'] ?? 'localhost',
                 'username'     => $dbParts['user'] ?? '',
                 'password'     => $dbParts['pass'] ?? '',
                 'database'     => ltrim($dbParts['path'] ?? '', '/'),
-                'DBDriver'     => 'Postgre', // Always use Postgre for PostgreSQL
+                'DBDriver'     => 'Postgre',
                 'DBPrefix'     => '',
                 'pConnect'     => false,
                 'DBDebug'      => (ENVIRONMENT !== 'production'),
@@ -195,11 +203,6 @@ class Database extends Config
                 'port'         => (int)($dbParts['port'] ?? 5432),
                 'numberNative' => false,
                 'foundRows'    => false,
-                // Add SSL mode for Render PostgreSQL
-                'sslmode'      => 'require',
-                'options'      => [
-                    'sslmode' => 'require'
-                ],
                 'dateFormat'   => [
                     'date'     => 'Y-m-d',
                     'datetime' => 'Y-m-d H:i:s',

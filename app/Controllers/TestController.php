@@ -112,6 +112,9 @@ class TestController extends BaseController
                 Environment: ' . ENVIRONMENT . '<br>
                 Base URL: ' . base_url() . '<br>
                 Working Directory: ' . getcwd() . '<br>
+                HTTP_HOST: ' . ($_SERVER['HTTP_HOST'] ?? 'NOT SET') . '<br>
+                HTTPS: ' . ($_SERVER['HTTPS'] ?? 'NOT SET') . '<br>
+                HTTP_X_FORWARDED_PROTO: ' . ($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? 'NOT SET') . '<br>
                 DATABASE_URL: ' . (getenv('DATABASE_URL') ? 'SET' : 'NOT SET') . '<br>
                 CI_ENVIRONMENT: ' . (getenv('CI_ENVIRONMENT') ? getenv('CI_ENVIRONMENT') : 'NOT SET') . '<br>
                 <br><strong>Available Extensions:</strong><br>
