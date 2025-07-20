@@ -23,29 +23,87 @@ class TestController extends BaseController
     public function dbTest()
     {
         try {
-            $db = \Config\Database::connect();
+            // Get database URL and parse it
+            $databaseUrl = $_ENV['DATABASE_URL'] ?? getenv('DATABASE_URL') ?? '';
             
-            // Simple connection test
-            if ($db->connID) {
-                return '✅ Database connection successful!<br>
-                        Driver: ' . get_class($db) . '<br>
-                        <a href="' . base_url('test') . '">← Back to Test</a>';
-            } else {
-                return '❌ Database connected but no connection ID<br>
-                        <a href="' . base_url('test') . '">← Back to Test</a>';
+            echo '<h2>🔍 Database Connection Debug</h2>';
+            echo '<strong>DATABASE_URL:</strong> ' . ($databaseUrl ? 'Set (length: ' . strlen($databaseUrl) . ')' : 'NOT SET') . '<br><br>';
+            
+            if ($databaseUrl) {
+                $dbParts = parse_url($databaseUrl);
+                echo '<strong>Parsed URL Components:</strong><br>';
+                echo '- Host: ' . ($dbParts['host'] ?? 'N/A') . '<br>';
+                echo '- Port: ' . ($dbParts['port'] ?? 'N/A') . '<br>';
+                echo '- Database: ' . ltrim($dbParts['path'] ?? '', '/') . '<br>';
+                echo '- Username: ' . ($dbParts['user'] ?? 'N/A') . '<br>';
+                echo '- Password: ' . (isset($dbParts['pass']) ? '[SET]' : 'N/A') . '<br><br>';
             }
+            
+            // Try to get database config
+            $db = \Config\Database::connect();
+            echo '<strong>Database Object:</strong> ' . get_class($db) . '<br>';
+            
+            // Check connection ID
+            if ($db->connID) {
+                echo '✅ <strong>Connection ID:</strong> Found<br>';
+                
+                // Try a simple query
+                try {
+                    $query = $db->query('SELECT 1 as test');
+                    $result = $query->getResult();
+                    
+                    if ($result) {
+                        echo '✅ <strong>Query Test:</strong> SUCCESS<br>';
+                        echo '✅ <strong>Database connection is fully working!</strong><br>';
+                    } else {
+                        echo '❌ <strong>Query Test:</strong> Query executed but no result<br>';
+                    }
+                } catch (\Exception $queryError) {
+                    echo '❌ <strong>Query Test:</strong> ' . $queryError->getMessage() . '<br>';
+                }
+                
+            } else {
+                echo '❌ <strong>Connection ID:</strong> NOT FOUND<br>';
+                
+                // Try to get more details about the connection
+                echo '<strong>Connection Details:</strong><br>';
+                echo '- Database: ' . $db->getDatabase() . '<br>';
+                echo '- Platform: ' . $db->getPlatform() . '<br>';
+                
+                // Check if we can get error info
+                if (method_exists($db, 'error')) {
+                    $error = $db->error();
+                    if ($error) {
+                        echo '- Error Code: ' . $error['code'] . '<br>';
+                        echo '- Error Message: ' . $error['message'] . '<br>';
+                    }
+                }
+            }
+            
+            echo '<br><a href="' . base_url('test') . '">← Back to Test</a>';
+            
         } catch (\Exception $e) {
-            return '❌ Database connection failed: ' . $e->getMessage() . '<br>
-                    <a href="' . base_url('test') . '">← Back to Test</a>';
+            echo '❌ <strong>Database connection failed:</strong> ' . $e->getMessage() . '<br>';
+            echo '<strong>Error Details:</strong><br>';
+            echo '- File: ' . $e->getFile() . '<br>';
+            echo '- Line: ' . $e->getLine() . '<br>';
+            echo '<br><a href="' . base_url('test') . '">← Back to Test</a>';
         }
     }
     
     public function phpInfo()
     {
-        return '📋 PHP Version: ' . PHP_VERSION . '<br>
+        return '📋 <strong>Environment Information:</strong><br>
+                PHP Version: ' . PHP_VERSION . '<br>
                 Environment: ' . ENVIRONMENT . '<br>
                 Base URL: ' . base_url() . '<br>
                 Working Directory: ' . getcwd() . '<br>
+                DATABASE_URL: ' . (getenv('DATABASE_URL') ? 'SET' : 'NOT SET') . '<br>
+                CI_ENVIRONMENT: ' . (getenv('CI_ENVIRONMENT') ? getenv('CI_ENVIRONMENT') : 'NOT SET') . '<br>
+                <br><strong>Available Extensions:</strong><br>
+                pgsql: ' . (extension_loaded('pgsql') ? 'YES' : 'NO') . '<br>
+                pdo_pgsql: ' . (extension_loaded('pdo_pgsql') ? 'YES' : 'NO') . '<br>
+                mysqli: ' . (extension_loaded('mysqli') ? 'YES' : 'NO') . '<br>
                 <a href="' . base_url('test') . '">← Back to Test</a>';
     }
 }
