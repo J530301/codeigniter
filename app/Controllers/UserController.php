@@ -83,7 +83,14 @@ class UserController extends BaseController
         $this->billModel->skipValidation(true);
 
         try {
+            // Debug: Log the data being inserted
+            log_message('info', 'Attempting to insert bill data: ' . json_encode($data));
+            
             $insertResult = $this->billModel->insert($data);
+            
+            // Debug: Log the result
+            log_message('info', 'Insert result: ' . ($insertResult ? 'SUCCESS' : 'FAILED'));
+            log_message('info', 'Model errors: ' . json_encode($this->billModel->errors()));
             
             if ($insertResult) {
                 // Get the inserted bill ID
@@ -113,12 +120,26 @@ class UserController extends BaseController
                 
                 return redirect()->to(base_url('user/dashboard'))->with('success', 'Bill created successfully!');
             } else {
-                // Log the error for debugging
-                log_message('error', 'Failed to insert bill: ' . json_encode($this->billModel->errors()));
-                return redirect()->back()->withInput()->with('error', 'Failed to create bill. Database error: ' . implode(', ', $this->billModel->errors()));
+                // Get more detailed error information
+                $errors = $this->billModel->errors();
+                $dbError = $this->billModel->db->error();
+                
+                log_message('error', 'Failed to insert bill. Model errors: ' . json_encode($errors));
+                log_message('error', 'Database error: ' . json_encode($dbError));
+                
+                $errorMessage = 'Failed to create bill. ';
+                if (!empty($errors)) {
+                    $errorMessage .= 'Validation errors: ' . implode(', ', $errors) . '. ';
+                }
+                if (!empty($dbError['message'])) {
+                    $errorMessage .= 'Database error: ' . $dbError['message'];
+                }
+                
+                return redirect()->back()->withInput()->with('error', $errorMessage);
             }
         } catch (\Exception $e) {
             log_message('error', 'Exception during bill creation: ' . $e->getMessage());
+            log_message('error', 'Stack trace: ' . $e->getTraceAsString());
             return redirect()->back()->withInput()->with('error', 'Failed to create bill. Error: ' . $e->getMessage());
         }
     }

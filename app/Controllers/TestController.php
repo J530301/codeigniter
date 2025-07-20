@@ -16,6 +16,7 @@ class TestController extends BaseController
                     <li><a href="' . base_url('test/dbTest') . '">Test Database Connection</a></li>
                     <li><a href="' . base_url('test/phpInfo') . '">PHP Info</a></li>
                     <li><a href="' . base_url('test/checkTables') . '">Check Database Tables</a></li>
+                    <li><a href="' . base_url('test/testBillInsert') . '">Test Bill Insert</a></li>
                     <li><a href="' . base_url('database/setup') . '">Setup Database</a></li>
                     <li><a href="' . base_url('login') . '">Go to Login</a></li>
                 </ul>';
@@ -158,6 +159,112 @@ class TestController extends BaseController
                     }
                 }
                 echo "<br>";
+            }
+            
+            echo '<br><a href="' . base_url('test') . '">← Back to Test</a>';
+            
+        } catch (\Exception $e) {
+            echo "❌ Error: " . $e->getMessage();
+            echo '<br><a href="' . base_url('test') . '">← Back to Test</a>';
+        }
+    }
+    
+    public function testBillInsert()
+    {
+        try {
+            $db = \Config\Database::connect();
+            
+            echo '<h2>🔍 Test Bill Insert</h2>';
+            
+            // Check if bills table exists and its structure
+            if (!$db->tableExists('bills')) {
+                echo "❌ Bills table does not exist!<br>";
+                echo '<a href="' . base_url('database/setup') . '">Setup Database</a><br>';
+                return;
+            }
+            
+            echo "✅ Bills table exists<br>";
+            
+            // Get table structure
+            $fields = $db->getFieldData('bills');
+            echo "<h3>Table Structure:</h3>";
+            echo "<pre>";
+            foreach ($fields as $field) {
+                echo "{$field->name} - {$field->type} - " . ($field->nullable ? 'NULL' : 'NOT NULL') . "\n";
+            }
+            echo "</pre>";
+            
+            // Test data
+            $testData = [
+                'user_id' => 1, // Assuming admin user exists
+                'item_name' => 'Test Item',
+                'description' => 'Test description',
+                'price' => 10.50,
+                'quantity' => 2,
+                'total_amount' => 21.00,
+                'status' => 'pending'
+            ];
+            
+            echo "<h3>Test Data:</h3>";
+            echo "<pre>" . json_encode($testData, JSON_PRETTY_PRINT) . "</pre>";
+            
+            // Try raw SQL insert
+            echo "<h3>Raw SQL Insert Test:</h3>";
+            try {
+                $sql = "INSERT INTO bills (user_id, item_name, description, price, quantity, total_amount, status) 
+                        VALUES (?, ?, ?, ?, ?, ?, ?)";
+                
+                $result = $db->query($sql, [
+                    $testData['user_id'],
+                    $testData['item_name'],
+                    $testData['description'],
+                    $testData['price'],
+                    $testData['quantity'],
+                    $testData['total_amount'],
+                    $testData['status']
+                ]);
+                
+                if ($result) {
+                    echo "✅ Raw SQL insert successful!<br>";
+                    $insertId = $db->insertID();
+                    echo "Insert ID: {$insertId}<br>";
+                } else {
+                    echo "❌ Raw SQL insert failed<br>";
+                    $error = $db->error();
+                    echo "Error: " . json_encode($error) . "<br>";
+                }
+            } catch (\Exception $e) {
+                echo "❌ Raw SQL Exception: " . $e->getMessage() . "<br>";
+            }
+            
+            // Try Model insert
+            echo "<h3>Model Insert Test:</h3>";
+            try {
+                $billModel = new \App\Models\BillModel();
+                $billModel->skipValidation(true);
+                
+                $testData2 = [
+                    'user_id' => 1,
+                    'item_name' => 'Test Item 2',
+                    'description' => 'Test description 2',
+                    'price' => 15.75,
+                    'quantity' => 1,
+                    'total_amount' => 15.75,
+                    'status' => 'pending'
+                ];
+                
+                $result = $billModel->insert($testData2);
+                
+                if ($result) {
+                    echo "✅ Model insert successful!<br>";
+                    echo "Insert ID: " . $billModel->getInsertID() . "<br>";
+                } else {
+                    echo "❌ Model insert failed<br>";
+                    echo "Model errors: " . json_encode($billModel->errors()) . "<br>";
+                    echo "DB errors: " . json_encode($db->error()) . "<br>";
+                }
+            } catch (\Exception $e) {
+                echo "❌ Model Exception: " . $e->getMessage() . "<br>";
             }
             
             echo '<br><a href="' . base_url('test') . '">← Back to Test</a>';
