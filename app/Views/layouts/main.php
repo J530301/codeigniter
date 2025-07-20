@@ -71,18 +71,18 @@
             /* Ensure content extends beyond viewport */
             main {
                 min-height: calc(100vh - 4rem);
-                padding-bottom: 8rem !important;
+                padding-bottom: 4rem !important; /* Reduced from 8rem */
             }
             
             /* Add extra margin to Quick Actions on mobile */
             .quick-actions-mobile {
-                margin-bottom: 4rem !important;
+                margin-bottom: 2rem !important; /* Reduced from 4rem */
             }
             
-            /* Force user page content to be scrollable */
+            /* Optimized user page content spacing */
             .user-content {
-                padding-bottom: 10rem !important;
-                min-height: calc(100vh + 200px) !important;
+                padding-bottom: 6rem !important; /* Reduced from 10rem */
+                min-height: calc(100vh + 50px) !important; /* Reduced extra height */
             }
         }
         
@@ -93,18 +93,18 @@
             }
             
             main {
-                padding-bottom: 10rem !important;
+                padding-bottom: 6rem !important; /* Reduced from 10rem */
             }
             
             /* Add extra margin to Quick Actions on mobile */
             .quick-actions-mobile {
-                margin-bottom: 4rem !important;
+                margin-bottom: 2rem !important; /* Reduced from 4rem */
             }
             
-            /* User pages need even more space on small screens */
+            /* Optimized user pages spacing for small screens */
             .user-content {
-                padding-bottom: 12rem !important;
-                min-height: calc(100vh + 300px) !important;
+                padding-bottom: 8rem !important; /* Reduced from 12rem */
+                min-height: calc(100vh + 100px) !important; /* Reduced extra height */
             }
         }
         
@@ -150,7 +150,7 @@
             
             .user-content {
                 min-height: -webkit-fill-available;
-                padding-bottom: 15rem !important;
+                padding-bottom: 8rem !important; /* Reduced from 15rem */
             }
             
             /* iOS specific mobile scrolling fixes */
@@ -160,12 +160,12 @@
             }
         }
         
-        /* Force scrollable area on all mobile devices */
+        /* Optimized scrollable area on mobile devices */
         @media screen and (max-width: 768px) {
             .user-content::after {
                 content: '';
                 display: block;
-                height: 200px;
+                height: 50px; /* Reduced from 200px */
                 width: 1px;
             }
         }

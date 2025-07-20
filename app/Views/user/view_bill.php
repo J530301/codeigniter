@@ -17,7 +17,7 @@
     </nav>
 
     <!-- Page Content -->
-    <main class="user-content p-4 sm:p-6 pb-40 min-h-screen"> <!-- Increased mobile padding to pb-40 -->
+    <main class="user-content p-4 sm:p-6 pb-16 min-h-screen"> <!-- Optimized mobile padding -->
         <div class="max-w-3xl mx-auto">
             <div class="bg-white shadow rounded-lg">
                 <!-- Header -->
@@ -164,7 +164,7 @@
             </div>
             
             <!-- Mobile scroll spacer - ensures content can be fully scrolled on mobile -->
-            <div class="block sm:hidden h-32"></div> <!-- Increased from h-20 to h-32 -->
+            <div class="block sm:hidden h-8"></div> <!-- Optimized spacer height -->
         </div>
     </main>
 </div>
