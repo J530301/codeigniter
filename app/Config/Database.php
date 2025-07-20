@@ -24,32 +24,7 @@ class Database extends Config
      *
      * @var array<string, mixed>
      */
-    public array $default = [
-        'DSN'          => env('DATABASE_URL', ''),
-        'hostname'     => env('database.default.hostname', 'localhost'),
-        'username'     => env('database.default.username', ''),
-        'password'     => env('database.default.password', ''),
-        'database'     => env('database.default.database', ''),
-        'DBDriver'     => 'Postgre', // Use PostgreSQL for production
-        'DBPrefix'     => env('database.default.DBPrefix', ''),
-        'pConnect'     => false,
-        'DBDebug'      => ENVIRONMENT !== 'production',
-        'charset'      => 'utf8',
-        'DBCollat'     => '',
-        'swapPre'      => '',
-        'encrypt'      => false,
-        'compress'     => false,
-        'strictOn'     => false,
-        'failover'     => [],
-        'port'         => env('database.default.port', 5432),
-        'numberNative' => false,
-        'foundRows'    => false,
-        'dateFormat'   => [
-            'date'     => 'Y-m-d',
-            'datetime' => 'Y-m-d H:i:s',
-            'time'     => 'H:i:s',
-        ],
-    ];
+    public array $default = [];
 
     //    /**
     //     * Sample database connection for SQLite3.
@@ -192,6 +167,34 @@ class Database extends Config
     public function __construct()
     {
         parent::__construct();
+
+        // Initialize database configuration
+        $this->default = [
+            'DSN'          => $_ENV['DATABASE_URL'] ?? getenv('DATABASE_URL') ?? '',
+            'hostname'     => $_ENV['database.default.hostname'] ?? getenv('database.default.hostname') ?? 'localhost',
+            'username'     => $_ENV['database.default.username'] ?? getenv('database.default.username') ?? '',
+            'password'     => $_ENV['database.default.password'] ?? getenv('database.default.password') ?? '',
+            'database'     => $_ENV['database.default.database'] ?? getenv('database.default.database') ?? '',
+            'DBDriver'     => 'Postgre', // Use PostgreSQL for production
+            'DBPrefix'     => $_ENV['database.default.DBPrefix'] ?? getenv('database.default.DBPrefix') ?? '',
+            'pConnect'     => false,
+            'DBDebug'      => (ENVIRONMENT !== 'production'),
+            'charset'      => 'utf8',
+            'DBCollat'     => '',
+            'swapPre'      => '',
+            'encrypt'      => false,
+            'compress'     => false,
+            'strictOn'     => false,
+            'failover'     => [],
+            'port'         => (int)($_ENV['database.default.port'] ?? getenv('database.default.port') ?? 5432),
+            'numberNative' => false,
+            'foundRows'    => false,
+            'dateFormat'   => [
+                'date'     => 'Y-m-d',
+                'datetime' => 'Y-m-d H:i:s',
+                'time'     => 'H:i:s',
+            ],
+        ];
 
         // Ensure that we always set the database group to 'tests' if
         // we are currently running an automated test suite, so that
