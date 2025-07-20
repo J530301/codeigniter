@@ -168,33 +168,68 @@ class Database extends Config
     {
         parent::__construct();
 
-        // Initialize database configuration
-        $this->default = [
-            'DSN'          => $_ENV['DATABASE_URL'] ?? getenv('DATABASE_URL') ?? '',
-            'hostname'     => $_ENV['database.default.hostname'] ?? getenv('database.default.hostname') ?? 'localhost',
-            'username'     => $_ENV['database.default.username'] ?? getenv('database.default.username') ?? '',
-            'password'     => $_ENV['database.default.password'] ?? getenv('database.default.password') ?? '',
-            'database'     => $_ENV['database.default.database'] ?? getenv('database.default.database') ?? '',
-            'DBDriver'     => 'Postgre', // Use PostgreSQL for production
-            'DBPrefix'     => $_ENV['database.default.DBPrefix'] ?? getenv('database.default.DBPrefix') ?? '',
-            'pConnect'     => false,
-            'DBDebug'      => (ENVIRONMENT !== 'production'),
-            'charset'      => 'utf8',
-            'DBCollat'     => '',
-            'swapPre'      => '',
-            'encrypt'      => false,
-            'compress'     => false,
-            'strictOn'     => false,
-            'failover'     => [],
-            'port'         => (int)($_ENV['database.default.port'] ?? getenv('database.default.port') ?? 5432),
-            'numberNative' => false,
-            'foundRows'    => false,
-            'dateFormat'   => [
-                'date'     => 'Y-m-d',
-                'datetime' => 'Y-m-d H:i:s',
-                'time'     => 'H:i:s',
-            ],
-        ];
+        // Get DATABASE_URL from environment
+        $databaseUrl = $_ENV['DATABASE_URL'] ?? getenv('DATABASE_URL') ?? '';
+        
+        // Parse DATABASE_URL if it exists
+        if ($databaseUrl) {
+            $dbParts = parse_url($databaseUrl);
+            
+            $this->default = [
+                'DSN'          => '', // Don't use DSN, use individual components
+                'hostname'     => $dbParts['host'] ?? 'localhost',
+                'username'     => $dbParts['user'] ?? '',
+                'password'     => $dbParts['pass'] ?? '',
+                'database'     => ltrim($dbParts['path'] ?? '', '/'),
+                'DBDriver'     => 'Postgre', // Always use Postgre for PostgreSQL
+                'DBPrefix'     => '',
+                'pConnect'     => false,
+                'DBDebug'      => (ENVIRONMENT !== 'production'),
+                'charset'      => 'utf8',
+                'DBCollat'     => '',
+                'swapPre'      => '',
+                'encrypt'      => false,
+                'compress'     => false,
+                'strictOn'     => false,
+                'failover'     => [],
+                'port'         => $dbParts['port'] ?? 5432,
+                'numberNative' => false,
+                'foundRows'    => false,
+                'dateFormat'   => [
+                    'date'     => 'Y-m-d',
+                    'datetime' => 'Y-m-d H:i:s',
+                    'time'     => 'H:i:s',
+                ],
+            ];
+        } else {
+            // Fallback configuration for local development
+            $this->default = [
+                'DSN'          => '',
+                'hostname'     => $_ENV['database.default.hostname'] ?? getenv('database.default.hostname') ?? 'localhost',
+                'username'     => $_ENV['database.default.username'] ?? getenv('database.default.username') ?? '',
+                'password'     => $_ENV['database.default.password'] ?? getenv('database.default.password') ?? '',
+                'database'     => $_ENV['database.default.database'] ?? getenv('database.default.database') ?? '',
+                'DBDriver'     => 'MySQLi',
+                'DBPrefix'     => $_ENV['database.default.DBPrefix'] ?? getenv('database.default.DBPrefix') ?? '',
+                'pConnect'     => false,
+                'DBDebug'      => (ENVIRONMENT !== 'production'),
+                'charset'      => 'utf8mb4',
+                'DBCollat'     => 'utf8mb4_general_ci',
+                'swapPre'      => '',
+                'encrypt'      => false,
+                'compress'     => false,
+                'strictOn'     => false,
+                'failover'     => [],
+                'port'         => (int)($_ENV['database.default.port'] ?? getenv('database.default.port') ?? 3306),
+                'numberNative' => false,
+                'foundRows'    => false,
+                'dateFormat'   => [
+                    'date'     => 'Y-m-d',
+                    'datetime' => 'Y-m-d H:i:s',
+                    'time'     => 'H:i:s',
+                ],
+            ];
+        }
 
         // Ensure that we always set the database group to 'tests' if
         // we are currently running an automated test suite, so that
