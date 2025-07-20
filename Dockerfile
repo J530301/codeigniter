@@ -11,7 +11,7 @@ RUN apt-get update && apt-get install -y \
     unzip \
     libicu-dev \
     libpq-dev \
-    && docker-php-ext-install pdo_mysql pdo_pgsql mysqli mbstring exif pcntl bcmath gd intl
+    && docker-php-ext-install pdo_mysql pdo_pgsql pgsql mysqli mbstring exif pcntl bcmath gd intl
 
 # Enable Apache mod_rewrite
 RUN a2enmod rewrite
