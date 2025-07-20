@@ -35,7 +35,7 @@
     </nav>
 
     <!-- Page Content -->
-    <main class="user-content p-4 sm:p-6 pb-20 min-h-screen"> <!-- Optimized mobile padding -->
+    <main class="user-content p-4 sm:p-6 pb-24 min-h-screen"> <!-- Optimized mobile padding -->
         <?php if (session()->get('success')): ?>
             <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
                 <span class="block sm:inline"><?= session()->get('success') ?></span>
@@ -284,7 +284,7 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
         <!-- Mobile scroll spacer - ensures content can be fully scrolled on mobile -->
-        <div class="block sm:hidden h-12"></div> <!-- Optimized spacer height -->
+        <div class="block sm:hidden h-16"></div> <!-- Optimized spacer height -->
     </main>
 </div>
 <?= $this->endSection() ?>
