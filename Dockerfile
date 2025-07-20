@@ -33,22 +33,23 @@ RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html \
     && chmod -R 777 writable/
 
-# Configure Apache for Render
-RUN echo '<VirtualHost *:$PORT>\n\
-    DocumentRoot /var/www/html/public\n\
-    \n\
-    <Directory /var/www/html/public>\n\
-        AllowOverride All\n\
-        Require all granted\n\
-    </Directory>\n\
-    \n\
-    ErrorLog ${APACHE_LOG_DIR}/error.log\n\
-    CustomLog ${APACHE_LOG_DIR}/access.log combined\n\
-</VirtualHost>' > /etc/apache2/sites-available/000-default.conf
+# Create startup script
+RUN echo '#!/bin/bash\n\
+export PORT=${PORT:-10000}\n\
+echo "Listen $PORT" > /etc/apache2/ports.conf\n\
+echo "<VirtualHost *:$PORT>" > /etc/apache2/sites-available/000-default.conf\n\
+echo "    DocumentRoot /var/www/html/public" >> /etc/apache2/sites-available/000-default.conf\n\
+echo "    <Directory /var/www/html/public>" >> /etc/apache2/sites-available/000-default.conf\n\
+echo "        AllowOverride All" >> /etc/apache2/sites-available/000-default.conf\n\
+echo "        Require all granted" >> /etc/apache2/sites-available/000-default.conf\n\
+echo "    </Directory>" >> /etc/apache2/sites-available/000-default.conf\n\
+echo "    ErrorLog ${APACHE_LOG_DIR}/error.log" >> /etc/apache2/sites-available/000-default.conf\n\
+echo "    CustomLog ${APACHE_LOG_DIR}/access.log combined" >> /etc/apache2/sites-available/000-default.conf\n\
+echo "</VirtualHost>" >> /etc/apache2/sites-available/000-default.conf\n\
+exec apache2-foreground' > /usr/local/bin/start.sh
 
-# Use PORT environment variable
-RUN sed -i 's/80/$PORT/g' /etc/apache2/ports.conf
+RUN chmod +x /usr/local/bin/start.sh
 
 EXPOSE $PORT
 
-CMD ["apache2-foreground"]
+CMD ["/usr/local/bin/start.sh"]
