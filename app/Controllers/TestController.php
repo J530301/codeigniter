@@ -19,6 +19,7 @@ class TestController extends BaseController
                     <li><a href="' . base_url('test/phpInfo') . '">PHP Info</a></li>
                     <li><a href="' . base_url('test/checkTables') . '">Check Database Tables</a></li>
                     <li><a href="' . base_url('test/testBillInsert') . '">Test Bill Insert</a></li>
+                    <li><a href="' . base_url('test/testNotifications') . '">Test Notifications</a></li>
                     <li><a href="' . base_url('database/setup') . '">Setup Database (Full Reset)</a></li>
                     <li><a href="' . base_url('database/fixSchema') . '">Fix Schema (amount→price)</a></li>
                     <li><a href="' . base_url('login') . '">Go to Login</a></li>
@@ -268,6 +269,99 @@ class TestController extends BaseController
                 }
             } catch (\Exception $e) {
                 echo "❌ Model Exception: " . $e->getMessage() . "<br>";
+            }
+            
+            echo '<br><a href="' . base_url('test') . '">← Back to Test</a>';
+            
+        } catch (\Exception $e) {
+            echo "❌ Error: " . $e->getMessage();
+            echo '<br><a href="' . base_url('test') . '">← Back to Test</a>';
+        }
+    }
+    
+    public function testNotifications()
+    {
+        try {
+            $db = \Config\Database::connect();
+            
+            echo '<h2>🔔 Notification System Test</h2>';
+            
+            // Check if notifications table exists
+            if (!$db->tableExists('notifications')) {
+                echo "❌ Notifications table does not exist!<br>";
+                echo '<a href="' . base_url('database/setup') . '">Setup Database</a><br>';
+                return;
+            }
+            
+            echo "✅ Notifications table exists<br><br>";
+            
+            // Get table structure
+            $fields = $db->getFieldData('notifications');
+            echo "<h3>Notifications Table Structure:</h3>";
+            echo "<pre>";
+            foreach ($fields as $field) {
+                echo "{$field->name} - {$field->type} - " . ($field->nullable ? 'NULL' : 'NOT NULL') . "\n";
+            }
+            echo "</pre>";
+            
+            // Check current notifications
+            $notifications = $db->table('notifications')->get()->getResultArray();
+            echo "<h3>Current Notifications (" . count($notifications) . " total):</h3>";
+            
+            if (count($notifications) > 0) {
+                echo "<pre>";
+                foreach ($notifications as $notification) {
+                    echo "ID: {$notification['id']}\n";
+                    echo "User ID: {$notification['user_id']}\n";
+                    echo "Title: {$notification['title']}\n";
+                    echo "Message: {$notification['message']}\n";
+                    echo "Type: {$notification['type']}\n";
+                    echo "Read: " . ($notification['is_read'] ? 'YES' : 'NO') . "\n";
+                    echo "Created: {$notification['created_at']}\n";
+                    echo "---\n";
+                }
+                echo "</pre>";
+            } else {
+                echo "No notifications found in database.<br><br>";
+            }
+            
+            // Test notification creation
+            echo "<h3>Test Notification Creation:</h3>";
+            
+            // Find admin users
+            $admins = $db->table('users')->where('role', 'admin')->get()->getResultArray();
+            echo "Admin users found: " . count($admins) . "<br>";
+            
+            if (count($admins) > 0) {
+                $admin = $admins[0];
+                echo "Testing notification for Admin ID: {$admin['id']} ({$admin['username']})<br>";
+                
+                // Create test notification using raw SQL
+                try {
+                    $sql = "INSERT INTO notifications (user_id, title, message, type, is_read) VALUES (?, ?, ?, ?, ?)";
+                    $result = $db->query($sql, [
+                        $admin['id'],
+                        'Test Notification',
+                        'This is a test notification created at ' . date('Y-m-d H:i:s'),
+                        'test',
+                        false
+                    ]);
+                    
+                    if ($result) {
+                        echo "✅ Test notification created successfully!<br>";
+                        $insertId = $db->insertID();
+                        echo "New notification ID: {$insertId}<br>";
+                    } else {
+                        echo "❌ Test notification creation failed<br>";
+                        $error = $db->error();
+                        echo "Error: " . json_encode($error) . "<br>";
+                    }
+                } catch (\Exception $e) {
+                    echo "❌ Test notification exception: " . $e->getMessage() . "<br>";
+                }
+                
+            } else {
+                echo "❌ No admin users found! Create admin user first.<br>";
             }
             
             echo '<br><a href="' . base_url('test') . '">← Back to Test</a>';

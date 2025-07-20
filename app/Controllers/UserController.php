@@ -105,6 +105,8 @@ class UserController extends BaseController
                 // Create notification for all admins
                 $admins = $this->userModel->where('role', 'admin')->findAll();
                 
+                log_message('info', 'Found ' . count($admins) . ' admin users for notifications');
+                
                 foreach ($admins as $admin) {
                     $notificationData = [
                         'user_id' => $admin['id'],
@@ -114,8 +116,16 @@ class UserController extends BaseController
                         'is_read' => 0
                     ];
                     
+                    log_message('info', 'Creating notification for admin ID: ' . $admin['id'] . ', Data: ' . json_encode($notificationData));
+                    
                     $this->notificationModel->skipValidation(true);
-                    $this->notificationModel->insert($notificationData);
+                    $notificationResult = $this->notificationModel->insert($notificationData);
+                    
+                    if ($notificationResult) {
+                        log_message('info', 'Notification created successfully, ID: ' . $this->notificationModel->getInsertID());
+                    } else {
+                        log_message('error', 'Failed to create notification for admin ID: ' . $admin['id'] . ', Errors: ' . json_encode($this->notificationModel->errors()));
+                    }
                 }
                 
                 return redirect()->to(base_url('user/dashboard'))->with('success', 'Bill created successfully!');

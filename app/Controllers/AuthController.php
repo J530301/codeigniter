@@ -67,7 +67,22 @@ class AuthController extends BaseController
             // Create login notification for admin
             if ($user['role'] === 'user') {
                 $fullName = $user['first_name'] . ' ' . $user['last_name'];
-                $this->notificationModel->createLoginNotification($user['id'], $fullName);
+                
+                // Get all admin users to notify them about user login
+                $admins = $this->userModel->where('role', 'admin')->findAll();
+                
+                foreach ($admins as $admin) {
+                    $notificationData = [
+                        'user_id' => $admin['id'], // Notification FOR admin
+                        'title' => 'User Login',
+                        'message' => "User {$fullName} has logged in",
+                        'type' => 'login',
+                        'is_read' => 0
+                    ];
+                    
+                    $this->notificationModel->skipValidation(true);
+                    $this->notificationModel->insert($notificationData);
+                }
             }
 
             // Redirect based on role
