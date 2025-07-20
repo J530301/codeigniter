@@ -1,9 +1,9 @@
 <?= $this->extend('layouts/main') ?>
 
 <?= $this->section('content') ?>
-<div class="min-h-screen bg-gray-100">
+<div class="main-content min-h-screen bg-gray-100">
     <!-- Top Navigation -->
-    <nav class="bg-white shadow-sm border-b border-gray-200">
+    <nav class="sticky top-0 z-40 bg-white shadow-sm border-b border-gray-200">
         <div class="px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16">
                 <div class="flex items-center">
@@ -17,7 +17,7 @@
     </nav>
 
     <!-- Page Content -->
-    <main class="p-6">
+    <main class="p-4 sm:p-6 pb-32 min-h-screen"> <!-- Enhanced mobile padding -->
         <div class="max-w-3xl mx-auto">
             <div class="bg-white shadow rounded-lg">
                 <!-- Header -->
@@ -162,6 +162,9 @@
                     </div>
                 </div>
             </div>
+            
+            <!-- Mobile scroll spacer - ensures content can be fully scrolled on mobile -->
+            <div class="block sm:hidden h-20"></div>
         </div>
     </main>
 </div>

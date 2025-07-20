@@ -1,7 +1,7 @@
 <?= $this->extend('layouts/main') ?>
 
 <?= $this->section('content') ?>
-<div class="min-h-screen bg-gray-100">
+<div class="main-content min-h-screen bg-gray-100">
     <!-- Top Navigation -->
     <nav class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-10">
         <div class="px-4 sm:px-6 lg:px-8">
@@ -50,7 +50,7 @@
     </div>
 
     <!-- Page Content -->
-    <main class="p-4 sm:p-6">
+    <main class="p-4 sm:p-6 pb-32 min-h-screen"> <!-- Enhanced mobile padding -->
         <div class="bg-white shadow rounded-lg">
             <div class="px-4 sm:px-6 py-4 border-b border-gray-200">
                 <h3 class="text-lg font-medium text-gray-900">All Bills</h3>
@@ -335,4 +335,9 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
+
+        <!-- Mobile scroll spacer - ensures content can be fully scrolled on mobile -->
+        <div class="block sm:hidden h-20"></div>
+    </main>
+</div>
 <?= $this->endSection() ?>
