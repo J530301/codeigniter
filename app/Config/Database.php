@@ -30,7 +30,7 @@ class Database extends Config
         'username'     => env('database.default.username', ''),
         'password'     => env('database.default.password', ''),
         'database'     => env('database.default.database', ''),
-        'DBDriver'     => env('DATABASE_URL') ? 'Postgre' : env('database.default.DBDriver', 'MySQLi'),
+        'DBDriver'     => 'Postgre', // Use PostgreSQL for production
         'DBPrefix'     => env('database.default.DBPrefix', ''),
         'pConnect'     => false,
         'DBDebug'      => ENVIRONMENT !== 'production',
