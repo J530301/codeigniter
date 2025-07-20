@@ -7,6 +7,16 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
+        /* Ensure proper mobile scrolling */
+        html, body {
+            height: 100%;
+            overflow-x: hidden;
+        }
+        
+        body {
+            -webkit-overflow-scrolling: touch; /* Enable smooth scrolling on iOS */
+        }
+        
         .sidebar {
             transform: translateX(-100%);
             transition: transform 0.3s ease-in-out;
@@ -21,6 +31,38 @@
         }
         .dropdown-content.active {
             max-height: 500px;
+        }
+        
+        /* Fix main content area for mobile scrolling */
+        .main-content {
+            min-height: 100vh;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        /* Mobile responsive fixes */
+        @media (max-width: 768px) {
+            /* Ensure main content is scrollable on mobile */
+            .main-content {
+                position: relative;
+                width: 100%;
+                padding-bottom: 2rem;
+            }
+            
+            /* Fix sidebar overlay on mobile */
+            .sidebar {
+                position: fixed;
+                top: 0;
+                left: 0;
+                height: 100vh;
+                overflow-y: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            
+            /* Prevent body scroll when sidebar is open */
+            body.sidebar-open {
+                overflow: hidden;
+            }
         }
         
         /* Mobile notification dropdown styles */
@@ -45,6 +87,11 @@
                 right: 0.25rem !important;
                 left: 0.25rem !important;
             }
+            
+            /* Better mobile padding */
+            .main-content {
+                padding: 0.5rem;
+            }
         }
     </style>
 </head>
@@ -52,11 +99,43 @@
     <?= $this->renderSection('content') ?>
 
     <script>
-        // Toggle sidebar
+        // Toggle sidebar with mobile scroll handling
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
+            const body = document.body;
+            
             sidebar.classList.toggle('active');
+            
+            // Prevent body scroll when sidebar is open on mobile
+            if (window.innerWidth <= 768) {
+                if (sidebar.classList.contains('active')) {
+                    body.classList.add('sidebar-open');
+                } else {
+                    body.classList.remove('sidebar-open');
+                }
+            }
         }
+
+        // Close sidebar when clicking outside (mobile)
+        document.addEventListener('click', function(event) {
+            const sidebar = document.getElementById('sidebar');
+            const toggleButton = event.target.closest('[onclick="toggleSidebar()"]');
+            
+            if (window.innerWidth <= 768 && sidebar.classList.contains('active') && 
+                !sidebar.contains(event.target) && !toggleButton) {
+                toggleSidebar();
+            }
+        });
+
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            const sidebar = document.getElementById('sidebar');
+            const body = document.body;
+            
+            if (window.innerWidth > 768) {
+                body.classList.remove('sidebar-open');
+            }
+        });
 
         // Toggle dropdown
         function toggleDropdown(dropdownId) {

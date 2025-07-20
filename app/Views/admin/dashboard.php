@@ -117,9 +117,9 @@
 </div>
 
 <!-- Main Content -->
-<div class="min-h-screen bg-gray-100">
+<div class="main-content min-h-screen bg-gray-100">
     <!-- Top Navigation -->
-    <nav class="bg-white shadow-sm border-b border-gray-200">
+    <nav class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">
         <div class="px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16">
                 <div class="flex items-center">
@@ -181,7 +181,7 @@
     </nav>
 
     <!-- Page Content -->
-    <main class="p-6">
+    <main class="p-4 sm:p-6 pb-20"> <!-- Add bottom padding for mobile -->
         <?php if (session()->get('success')): ?>
             <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
                 <span class="block sm:inline"><?= session()->get('success') ?></span>
@@ -195,7 +195,7 @@
         <?php endif; ?>
 
         <!-- Dashboard Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
             <div class="bg-white overflow-hidden shadow rounded-lg">
                 <div class="p-5">
                     <div class="flex items-center">
@@ -262,28 +262,28 @@
         </div>
 
         <!-- Quick Actions -->
-        <div class="bg-white shadow rounded-lg p-6">
+        <div class="bg-white shadow rounded-lg p-4 sm:p-6">
             <h3 class="text-lg font-medium text-gray-900 mb-4">Quick Actions</h3>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <a href="/admin/users" class="flex items-center p-4 bg-gray-50 hover:bg-gray-100 rounded-lg">
-                    <i class="fas fa-users text-2xl text-indigo-600 mr-3"></i>
-                    <div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <a href="/admin/users" class="flex items-center p-4 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors">
+                    <i class="fas fa-users text-2xl text-indigo-600 mr-3 flex-shrink-0"></i>
+                    <div class="min-w-0">
                         <h4 class="font-medium text-gray-900">Manage Users</h4>
                         <p class="text-sm text-gray-600">View and manage user accounts</p>
                     </div>
                 </a>
                 
-                <a href="/admin/bills" class="flex items-center p-4 bg-gray-50 hover:bg-gray-100 rounded-lg">
-                    <i class="fas fa-file-invoice text-2xl text-green-600 mr-3"></i>
-                    <div>
+                <a href="/admin/bills" class="flex items-center p-4 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors">
+                    <i class="fas fa-file-invoice text-2xl text-green-600 mr-3 flex-shrink-0"></i>
+                    <div class="min-w-0">
                         <h4 class="font-medium text-gray-900">Manage Bills</h4>
                         <p class="text-sm text-gray-600">Review and manage bills</p>
                     </div>
                 </a>
                 
-                <a href="/admin/notifications" class="flex items-center p-4 bg-gray-50 hover:bg-gray-100 rounded-lg">
-                    <i class="fas fa-bell text-2xl text-red-600 mr-3"></i>
-                    <div>
+                <a href="/admin/notifications" class="flex items-center p-4 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors">
+                    <i class="fas fa-bell text-2xl text-red-600 mr-3 flex-shrink-0"></i>
+                    <div class="min-w-0">
                         <h4 class="font-medium text-gray-900">View Notifications</h4>
                         <p class="text-sm text-gray-600">Check recent notifications</p>
                     </div>
