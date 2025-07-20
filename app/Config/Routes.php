@@ -8,6 +8,10 @@ use CodeIgniter\Router\RouteCollection;
 
 // Authentication routes
 $routes->group('', ['namespace' => 'App\Controllers'], function($routes) {
+    // Database setup routes
+    $routes->get('database/setup', 'DatabaseController::setup');
+    $routes->get('database/reset', 'DatabaseController::reset');
+    
     // Test routes for debugging
     $routes->get('test', 'TestController::index');
     $routes->get('test/dbTest', 'TestController::dbTest');
