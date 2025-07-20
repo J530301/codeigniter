@@ -118,13 +118,35 @@ class UserController extends BaseController
                     
                     log_message('info', 'Creating notification for admin ID: ' . $admin['id'] . ', Data: ' . json_encode($notificationData));
                     
-                    $this->notificationModel->skipValidation(true);
-                    $notificationResult = $this->notificationModel->insert($notificationData);
-                    
-                    if ($notificationResult) {
-                        log_message('info', 'Notification created successfully, ID: ' . $this->notificationModel->getInsertID());
-                    } else {
-                        log_message('error', 'Failed to create notification for admin ID: ' . $admin['id'] . ', Errors: ' . json_encode($this->notificationModel->errors()));
+                    try {
+                        // Try using the model first
+                        $this->notificationModel->skipValidation(true);
+                        $notificationResult = $this->notificationModel->insert($notificationData);
+                        
+                        if ($notificationResult) {
+                            log_message('info', 'Notification created successfully via model, ID: ' . $this->notificationModel->getInsertID());
+                        } else {
+                            log_message('error', 'Model insert failed, trying raw SQL. Model errors: ' . json_encode($this->notificationModel->errors()));
+                            
+                            // Fallback to raw SQL
+                            $db = \Config\Database::connect();
+                            $sql = "INSERT INTO notifications (user_id, title, message, type, is_read) VALUES (?, ?, ?, ?, ?)";
+                            $rawResult = $db->query($sql, [
+                                $notificationData['user_id'],
+                                $notificationData['title'],
+                                $notificationData['message'],
+                                $notificationData['type'],
+                                $notificationData['is_read']
+                            ]);
+                            
+                            if ($rawResult) {
+                                log_message('info', 'Notification created successfully via raw SQL, ID: ' . $db->insertID());
+                            } else {
+                                log_message('error', 'Raw SQL insert also failed: ' . json_encode($db->error()));
+                            }
+                        }
+                    } catch (\Exception $e) {
+                        log_message('error', 'Exception during notification creation: ' . $e->getMessage());
                     }
                 }
                 

@@ -20,6 +20,7 @@ class TestController extends BaseController
                     <li><a href="' . base_url('test/checkTables') . '">Check Database Tables</a></li>
                     <li><a href="' . base_url('test/testBillInsert') . '">Test Bill Insert</a></li>
                     <li><a href="' . base_url('test/testNotifications') . '">Test Notifications</a></li>
+                    <li><a href="' . base_url('test/debugNotifications') . '">Debug Notification Issues</a></li>
                     <li><a href="' . base_url('database/setup') . '">Setup Database (Full Reset)</a></li>
                     <li><a href="' . base_url('database/fixSchema') . '">Fix Schema (amount→price)</a></li>
                     <li><a href="' . base_url('login') . '">Go to Login</a></li>
@@ -362,6 +363,127 @@ class TestController extends BaseController
                 
             } else {
                 echo "❌ No admin users found! Create admin user first.<br>";
+            }
+            
+            echo '<br><a href="' . base_url('test') . '">← Back to Test</a>';
+            
+        } catch (\Exception $e) {
+            echo "❌ Error: " . $e->getMessage();
+            echo '<br><a href="' . base_url('test') . '">← Back to Test</a>';
+        }
+    }
+    
+    public function debugNotifications()
+    {
+        try {
+            $db = \Config\Database::connect();
+            
+            echo '<h2>🐛 Notification Debug Investigation</h2>';
+            
+            // Check recent logs (if we can access them)
+            echo "<h3>Recent Activity Analysis:</h3>";
+            
+            // Check bills without corresponding notifications
+            $bills = $db->table('bills')->orderBy('created_at', 'DESC')->get()->getResultArray();
+            $notifications = $db->table('notifications')->get()->getResultArray();
+            
+            echo "Bills in database: " . count($bills) . "<br>";
+            echo "Notifications in database: " . count($notifications) . "<br><br>";
+            
+            echo "<h4>Bills Analysis:</h4>";
+            foreach ($bills as $bill) {
+                echo "Bill ID: {$bill['id']}, User ID: {$bill['user_id']}, Created: {$bill['created_at']}<br>";
+                
+                // Look for corresponding notification
+                $found = false;
+                foreach ($notifications as $notification) {
+                    if (strpos($notification['message'], "#{$bill['id']}") !== false) {
+                        echo "&nbsp;&nbsp;→ ✅ Found notification: {$notification['title']}<br>";
+                        $found = true;
+                    }
+                }
+                if (!$found) {
+                    echo "&nbsp;&nbsp;→ ❌ No notification found for this bill!<br>";
+                }
+            }
+            
+            echo "<br><h3>Manual Test - Create Notification for Recent Bill:</h3>";
+            
+            if (count($bills) > 0) {
+                $recentBill = $bills[0];
+                $user = $db->table('users')->where('id', $recentBill['user_id'])->get()->getRowArray();
+                $admins = $db->table('users')->where('role', 'admin')->get()->getResultArray();
+                
+                echo "Testing with Bill ID: {$recentBill['id']}<br>";
+                echo "Bill User: {$user['first_name']} {$user['last_name']} (ID: {$user['id']})<br>";
+                echo "Admin users to notify: " . count($admins) . "<br><br>";
+                
+                // Try to create the notification manually
+                if (count($admins) > 0) {
+                    $admin = $admins[0];
+                    
+                    $notificationData = [
+                        'user_id' => $admin['id'],
+                        'title' => 'Manual Test - Bill Created',
+                        'message' => "DEBUG: User {$user['first_name']} {$user['last_name']} created bill #{$recentBill['id']} for {$recentBill['item_name']} worth \${$recentBill['total_amount']}",
+                        'type' => 'debug_bill',
+                        'is_read' => false
+                    ];
+                    
+                    try {
+                        // Test raw SQL insert
+                        $sql = "INSERT INTO notifications (user_id, title, message, type, is_read) VALUES (?, ?, ?, ?, ?)";
+                        $result = $db->query($sql, [
+                            $notificationData['user_id'],
+                            $notificationData['title'],
+                            $notificationData['message'],
+                            $notificationData['type'],
+                            $notificationData['is_read']
+                        ]);
+                        
+                        if ($result) {
+                            echo "✅ Manual notification created successfully!<br>";
+                            echo "Insert ID: " . $db->insertID() . "<br>";
+                        } else {
+                            echo "❌ Manual notification failed<br>";
+                            $error = $db->error();
+                            echo "Error: " . json_encode($error) . "<br>";
+                        }
+                    } catch (\Exception $e) {
+                        echo "❌ Exception: " . $e->getMessage() . "<br>";
+                    }
+                }
+            }
+            
+            echo "<br><h3>Test NotificationModel:</h3>";
+            try {
+                $notificationModel = new \App\Models\NotificationModel();
+                
+                // Get validation rules
+                echo "Validation rules: <pre>" . print_r($notificationModel->getValidationRules(), true) . "</pre>";
+                
+                // Test insert with the model
+                $testData = [
+                    'user_id' => 1, // Admin user
+                    'title' => 'Model Debug Test',
+                    'message' => 'Testing notification model at ' . date('Y-m-d H:i:s'),
+                    'type' => 'debug',
+                    'is_read' => 0
+                ];
+                
+                $notificationModel->skipValidation(true);
+                $result = $notificationModel->insert($testData);
+                
+                if ($result) {
+                    echo "✅ NotificationModel insert successful!<br>";
+                    echo "Insert ID: " . $notificationModel->getInsertID() . "<br>";
+                } else {
+                    echo "❌ NotificationModel insert failed<br>";
+                    echo "Errors: " . json_encode($notificationModel->errors()) . "<br>";
+                }
+                
+            } catch (\Exception $e) {
+                echo "❌ NotificationModel exception: " . $e->getMessage() . "<br>";
             }
             
             echo '<br><a href="' . base_url('test') . '">← Back to Test</a>';

@@ -71,6 +71,8 @@ class AuthController extends BaseController
                 // Get all admin users to notify them about user login
                 $admins = $this->userModel->where('role', 'admin')->findAll();
                 
+                log_message('info', 'User login: Creating notifications for ' . count($admins) . ' admin users');
+                
                 foreach ($admins as $admin) {
                     $notificationData = [
                         'user_id' => $admin['id'], // Notification FOR admin
@@ -80,8 +82,35 @@ class AuthController extends BaseController
                         'is_read' => 0
                     ];
                     
-                    $this->notificationModel->skipValidation(true);
-                    $this->notificationModel->insert($notificationData);
+                    try {
+                        $this->notificationModel->skipValidation(true);
+                        $result = $this->notificationModel->insert($notificationData);
+                        
+                        if ($result) {
+                            log_message('info', 'Login notification created for admin ID: ' . $admin['id']);
+                        } else {
+                            log_message('error', 'Login notification failed via model for admin ID: ' . $admin['id'] . ', errors: ' . json_encode($this->notificationModel->errors()));
+                            
+                            // Fallback to raw SQL
+                            $db = \Config\Database::connect();
+                            $sql = "INSERT INTO notifications (user_id, title, message, type, is_read) VALUES (?, ?, ?, ?, ?)";
+                            $rawResult = $db->query($sql, [
+                                $notificationData['user_id'],
+                                $notificationData['title'],
+                                $notificationData['message'],
+                                $notificationData['type'],
+                                $notificationData['is_read']
+                            ]);
+                            
+                            if ($rawResult) {
+                                log_message('info', 'Login notification created via raw SQL for admin ID: ' . $admin['id']);
+                            } else {
+                                log_message('error', 'Login notification failed completely for admin ID: ' . $admin['id']);
+                            }
+                        }
+                    } catch (\Exception $e) {
+                        log_message('error', 'Exception during login notification: ' . $e->getMessage());
+                    }
                 }
             }
 
