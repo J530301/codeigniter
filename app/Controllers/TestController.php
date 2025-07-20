@@ -19,7 +19,8 @@ class TestController extends BaseController
                     <li><a href="' . base_url('test/phpInfo') . '">PHP Info</a></li>
                     <li><a href="' . base_url('test/checkTables') . '">Check Database Tables</a></li>
                     <li><a href="' . base_url('test/testBillInsert') . '">Test Bill Insert</a></li>
-                    <li><a href="' . base_url('database/setup') . '">Setup Database</a></li>
+                    <li><a href="' . base_url('database/setup') . '">Setup Database (Full Reset)</a></li>
+                    <li><a href="' . base_url('database/fixSchema') . '">Fix Schema (amount→price)</a></li>
                     <li><a href="' . base_url('login') . '">Go to Login</a></li>
                 </ul>';
     }

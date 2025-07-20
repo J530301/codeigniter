@@ -9,6 +9,11 @@ class DatabaseController extends BaseController
         try {
             $db = \Config\Database::connect();
             
+            // Drop existing tables to recreate with correct schema
+            $db->query("DROP TABLE IF EXISTS notifications CASCADE");
+            $db->query("DROP TABLE IF EXISTS bills CASCADE");
+            $db->query("DROP TABLE IF EXISTS users CASCADE");
+            
             // Create users table
             $usersSql = "CREATE TABLE IF NOT EXISTS users (
                 id SERIAL PRIMARY KEY,
@@ -25,7 +30,7 @@ class DatabaseController extends BaseController
             
             $db->query($usersSql);
             
-            // Create bills table
+            // Create bills table with PRICE column (not amount)
             $billsSql = "CREATE TABLE IF NOT EXISTS bills (
                 id SERIAL PRIMARY KEY,
                 user_id INTEGER NOT NULL,
@@ -38,7 +43,7 @@ class DatabaseController extends BaseController
                 admin_comments TEXT,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (user_id) REFERENCES users(id)
+                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
             )";
             
             $db->query($billsSql);
@@ -66,12 +71,43 @@ class DatabaseController extends BaseController
             $db->query($adminSql, [$hashedPassword]);
             
             return 'Database setup completed successfully!<br>
-                    Tables created: users, bills, notifications<br>
+                    Tables recreated with correct schema:<br>
+                    - users (with proper columns)<br>
+                    - bills (with PRICE column, not amount)<br>
+                    - notifications<br>
                     Default admin user created: admin / admin123<br>
-                    <a href="' . base_url() . '">Go to Login</a>';
+                    <a href="' . base_url() . '">Go to Login</a> | 
+                    <a href="' . base_url('test/checkTables') . '">Check Tables</a>';
             
         } catch (\Exception $e) {
             return 'Database setup failed: ' . $e->getMessage();
+        }
+    }
+    
+    public function fixSchema()
+    {
+        try {
+            $db = \Config\Database::connect();
+            
+            // Check if bills table has wrong schema
+            $fields = $db->getFieldNames('bills');
+            
+            if (in_array('amount', $fields) && !in_array('price', $fields)) {
+                // Table has old schema, fix it
+                $db->query("ALTER TABLE bills RENAME COLUMN amount TO price");
+                return 'Schema fixed! Renamed "amount" column to "price" in bills table.<br>
+                        <a href="' . base_url('test/checkTables') . '">Check Tables</a>';
+            } elseif (in_array('price', $fields)) {
+                return 'Schema is already correct! Bills table has "price" column.<br>
+                        <a href="' . base_url('test/checkTables') . '">Check Tables</a>';
+            } else {
+                return 'Bills table structure is unexpected. Consider running full setup.<br>
+                        <a href="' . base_url('database/setup') . '">Full Setup</a>';
+            }
+            
+        } catch (\Exception $e) {
+            return 'Schema fix failed: ' . $e->getMessage() . '<br>
+                    Consider running full setup: <a href="' . base_url('database/setup') . '">Full Setup</a>';
         }
     }
     

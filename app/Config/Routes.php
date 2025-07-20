@@ -17,6 +17,7 @@ $routes->get('test/checkTables', 'TestController::checkTables');
 $routes->get('test/testBillInsert', 'TestController::testBillInsert');
 $routes->get('database/setup', 'DatabaseController::setup');
 $routes->get('database/reset', 'DatabaseController::reset');
+$routes->get('database/fixSchema', 'DatabaseController::fixSchema');
 
 // Authentication routes
 $routes->group('', ['namespace' => 'App\Controllers'], function($routes) {
