@@ -109,28 +109,27 @@ class UserController extends BaseController
                 
                 foreach ($admins as $admin) {
                     $notificationData = [
-                        'user_id' => $admin['id'],
+                        'user_id' => (int)$admin['id'], // Ensure integer
                         'title' => 'New Bill Created',
                         'message' => "User {$userName} has created a new bill (#{$billId}) for \"{$itemName}\" worth \${$totalAmount}. Please review and approve/reject the bill.",
                         'type' => 'bill_created',
-                        'is_read' => 0
+                        'is_read' => 0 // Ensure integer
                     ];
                     
                     log_message('info', 'Creating notification for admin ID: ' . $admin['id'] . ', Data: ' . json_encode($notificationData));
                     
                     try {
-                        // Try using the model first
-                        $this->notificationModel->skipValidation(true);
-                        $notificationResult = $this->notificationModel->insert($notificationData);
+                        // Try using the debug method first
+                        $notificationResult = $this->notificationModel->debugInsert($notificationData);
                         
                         if ($notificationResult) {
-                            log_message('info', 'Notification created successfully via model, ID: ' . $this->notificationModel->getInsertID());
+                            log_message('info', 'Notification created successfully via debugInsert, ID: ' . $this->notificationModel->getInsertID());
                         } else {
-                            log_message('error', 'Model insert failed, trying raw SQL. Model errors: ' . json_encode($this->notificationModel->errors()));
+                            log_message('error', 'DebugInsert failed, trying raw SQL. Model errors: ' . json_encode($this->notificationModel->errors()));
                             
-                            // Fallback to raw SQL
+                            // Fallback to raw SQL with explicit timestamp
                             $db = \Config\Database::connect();
-                            $sql = "INSERT INTO notifications (user_id, title, message, type, is_read) VALUES (?, ?, ?, ?, ?)";
+                            $sql = "INSERT INTO notifications (user_id, title, message, type, is_read, created_at, updated_at) VALUES (?, ?, ?, ?, ?, NOW(), NOW())";
                             $rawResult = $db->query($sql, [
                                 $notificationData['user_id'],
                                 $notificationData['title'],

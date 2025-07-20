@@ -27,7 +27,8 @@ class NotificationModel extends Model
         'user_id' => 'required|integer',
         'title'   => 'required|min_length[3]|max_length[255]',
         'message' => 'required|min_length[3]',
-        'type'    => 'required|max_length[50]'
+        'type'    => 'required|max_length[50]',
+        'is_read' => 'permit_empty|in_list[0,1]'
     ];
 
     protected $validationMessages = [];
@@ -66,11 +67,46 @@ class NotificationModel extends Model
     public function createLoginNotification($userId, $userFullName)
     {
         return $this->insert([
-            'user_id' => $userId,
+            'user_id' => (int)$userId,
             'title'   => 'User Login',
             'message' => "User {$userFullName} has logged in",
             'type'    => 'login',
-            'is_read' => false
+            'is_read' => 0
         ]);
+    }
+
+    public function createBillNotification($userId, $billData)
+    {
+        return $this->insert([
+            'user_id' => (int)$userId,
+            'title'   => 'New Bill Created',
+            'message' => "New bill created: {$billData['customer_name']} - $" . number_format($billData['price'], 2),
+            'type'    => 'bill',
+            'is_read' => 0
+        ]);
+    }
+
+    public function debugInsert($data)
+    {
+        // Log the data being inserted
+        log_message('info', 'NotificationModel debugInsert data: ' . json_encode($data));
+        
+        // Ensure proper data types
+        if (isset($data['user_id'])) {
+            $data['user_id'] = (int)$data['user_id'];
+        }
+        if (isset($data['is_read'])) {
+            $data['is_read'] = (int)$data['is_read'];
+        }
+        
+        // Try insert with validation disabled first
+        $this->skipValidation(true);
+        $result = $this->insert($data);
+        
+        if (!$result) {
+            log_message('error', 'NotificationModel insert failed: ' . json_encode($this->errors()));
+        }
+        
+        return $result;
     }
 }

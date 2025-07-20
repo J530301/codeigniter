@@ -75,16 +75,15 @@ class AuthController extends BaseController
                 
                 foreach ($admins as $admin) {
                     $notificationData = [
-                        'user_id' => $admin['id'], // Notification FOR admin
+                        'user_id' => (int)$admin['id'], // Notification FOR admin - ensure integer
                         'title' => 'User Login',
                         'message' => "User {$fullName} has logged in",
                         'type' => 'login',
-                        'is_read' => 0
+                        'is_read' => 0 // Ensure integer
                     ];
                     
                     try {
-                        $this->notificationModel->skipValidation(true);
-                        $result = $this->notificationModel->insert($notificationData);
+                        $result = $this->notificationModel->debugInsert($notificationData);
                         
                         if ($result) {
                             log_message('info', 'Login notification created for admin ID: ' . $admin['id']);
@@ -93,7 +92,7 @@ class AuthController extends BaseController
                             
                             // Fallback to raw SQL
                             $db = \Config\Database::connect();
-                            $sql = "INSERT INTO notifications (user_id, title, message, type, is_read) VALUES (?, ?, ?, ?, ?)";
+                            $sql = "INSERT INTO notifications (user_id, title, message, type, is_read, created_at, updated_at) VALUES (?, ?, ?, ?, ?, NOW(), NOW())";
                             $rawResult = $db->query($sql, [
                                 $notificationData['user_id'],
                                 $notificationData['title'],
