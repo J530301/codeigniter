@@ -39,7 +39,17 @@ class TestController extends BaseController
                 echo '- Password: ' . (isset($dbParts['pass']) ? '[SET]' : 'N/A') . '<br><br>';
             }
             
-            // Try to get database config
+            // Get the database configuration to verify our parsing
+            $config = new \Config\Database();
+            echo '<strong>Generated Database Config:</strong><br>';
+            echo '- Host: ' . $config->default['hostname'] . '<br>';
+            echo '- Port: ' . $config->default['port'] . '<br>';
+            echo '- Database: ' . $config->default['database'] . '<br>';
+            echo '- Username: ' . $config->default['username'] . '<br>';
+            echo '- Password: ' . ($config->default['password'] ? '[SET]' : 'EMPTY') . '<br>';
+            echo '- DBDriver: ' . $config->default['DBDriver'] . '<br><br>';
+            
+            // Try to get database connection
             $db = \Config\Database::connect();
             echo '<strong>Database Object:</strong> ' . get_class($db) . '<br>';
             
@@ -63,20 +73,24 @@ class TestController extends BaseController
                 }
                 
             } else {
-                echo '❌ <strong>Connection ID:</strong> NOT FOUND<br>';
+                echo '❌ <strong>Connection ID:</strong> NOT FOUND (Connection failed)<br>';
                 
-                // Try to get more details about the connection
-                echo '<strong>Connection Details:</strong><br>';
-                echo '- Database: ' . $db->getDatabase() . '<br>';
-                echo '- Platform: ' . $db->getPlatform() . '<br>';
-                
-                // Check if we can get error info
-                if (method_exists($db, 'error')) {
-                    $error = $db->error();
-                    if ($error) {
-                        echo '- Error Code: ' . $error['code'] . '<br>';
-                        echo '- Error Message: ' . $error['message'] . '<br>';
+                // Try manual connection to get better error info
+                echo '<strong>Attempting manual connection test...</strong><br>';
+                try {
+                    $connString = "host={$config->default['hostname']} port={$config->default['port']} dbname={$config->default['database']} user={$config->default['username']} password={$config->default['password']}";
+                    echo '- Connection string: ' . str_replace($config->default['password'], '[PASSWORD]', $connString) . '<br>';
+                    
+                    $manualConn = pg_connect($connString);
+                    if ($manualConn) {
+                        echo '✅ <strong>Manual connection:</strong> SUCCESS<br>';
+                        pg_close($manualConn);
+                    } else {
+                        echo '❌ <strong>Manual connection:</strong> FAILED<br>';
+                        echo '- Error: ' . pg_last_error() . '<br>';
                     }
+                } catch (\Exception $manualError) {
+                    echo '❌ <strong>Manual connection error:</strong> ' . $manualError->getMessage() . '<br>';
                 }
             }
             
