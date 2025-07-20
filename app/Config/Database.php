@@ -192,9 +192,14 @@ class Database extends Config
                 'compress'     => false,
                 'strictOn'     => false,
                 'failover'     => [],
-                'port'         => $dbParts['port'] ?? 5432,
+                'port'         => (int)($dbParts['port'] ?? 5432),
                 'numberNative' => false,
                 'foundRows'    => false,
+                // Add SSL mode for Render PostgreSQL
+                'sslmode'      => 'require',
+                'options'      => [
+                    'sslmode' => 'require'
+                ],
                 'dateFormat'   => [
                     'date'     => 'Y-m-d',
                     'datetime' => 'Y-m-d H:i:s',
