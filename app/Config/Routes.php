@@ -17,6 +17,7 @@ $routes->get('test/checkTables', 'TestController::checkTables');
 $routes->get('test/testBillInsert', 'TestController::testBillInsert');
 $routes->get('test/testNotifications', 'TestController::testNotifications');
 $routes->get('test/debugNotifications', 'TestController::debugNotifications');
+$routes->get('diagnostic/notifications', 'DiagnosticController::notificationDiagnostic');
 $routes->get('database/setup', 'DatabaseController::setup');
 $routes->get('database/reset', 'DatabaseController::reset');
 $routes->get('database/fixSchema', 'DatabaseController::fixSchema');
