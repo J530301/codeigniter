@@ -10,6 +10,8 @@ class TestController extends BaseController
                 <p>✅ If you can see this, your CodeIgniter app is working!</p>
                 <p>Environment: ' . ENVIRONMENT . '</p>
                 <p>Base URL: ' . base_url() . '</p>
+                <p>Current URL: ' . current_url() . '</p>
+                <p>Server Time: ' . date('Y-m-d H:i:s') . '</p>
                 
                 <h2>Test Links:</h2>
                 <ul>

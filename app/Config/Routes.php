@@ -6,18 +6,20 @@ use CodeIgniter\Router\RouteCollection;
  * @var RouteCollection $routes
  */
 
+// Set default namespace for all routes
+$routes->setDefaultNamespace('App\Controllers');
+
+// Test routes (outside groups for direct access)
+$routes->get('test', 'TestController::index');
+$routes->get('test/dbTest', 'TestController::dbTest');
+$routes->get('test/phpInfo', 'TestController::phpInfo');
+$routes->get('test/checkTables', 'TestController::checkTables');
+$routes->get('test/testBillInsert', 'TestController::testBillInsert');
+$routes->get('database/setup', 'DatabaseController::setup');
+$routes->get('database/reset', 'DatabaseController::reset');
+
 // Authentication routes
 $routes->group('', ['namespace' => 'App\Controllers'], function($routes) {
-    // Test routes for debugging
-    $routes->get('test', 'TestController::index');
-    $routes->get('test/dbTest', 'TestController::dbTest');
-    $routes->get('test/phpInfo', 'TestController::phpInfo');
-    $routes->get('test/checkTables', 'TestController::checkTables');
-    $routes->get('test/testBillInsert', 'TestController::testBillInsert');
-    
-    // Database setup routes
-    $routes->get('database/setup', 'DatabaseController::setup');
-    $routes->get('database/reset', 'DatabaseController::reset');
     
     // Default route - redirect to login
     $routes->get('/', 'AuthController::login');
