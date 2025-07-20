@@ -15,6 +15,7 @@ class TestController extends BaseController
                 <ul>
                     <li><a href="' . base_url('test/dbTest') . '">Test Database Connection</a></li>
                     <li><a href="' . base_url('test/phpInfo') . '">PHP Info</a></li>
+                    <li><a href="' . base_url('test/checkTables') . '">Check Database Tables</a></li>
                     <li><a href="' . base_url('database/setup') . '">Setup Database</a></li>
                     <li><a href="' . base_url('login') . '">Go to Login</a></li>
                 </ul>';
@@ -122,5 +123,48 @@ class TestController extends BaseController
                 pdo_pgsql: ' . (extension_loaded('pdo_pgsql') ? 'YES' : 'NO') . '<br>
                 mysqli: ' . (extension_loaded('mysqli') ? 'YES' : 'NO') . '<br>
                 <a href="' . base_url('test') . '">← Back to Test</a>';
+    }
+    
+    public function checkTables()
+    {
+        try {
+            $db = \Config\Database::connect();
+            
+            echo '<h2>🔍 Database Table Check</h2>';
+            
+            // Check if tables exist
+            $tables = ['users', 'bills', 'notifications'];
+            
+            foreach ($tables as $table) {
+                echo "<h3>Table: {$table}</h3>";
+                
+                // Check if table exists
+                $exists = $db->tableExists($table);
+                echo "Exists: " . ($exists ? '✅ YES' : '❌ NO') . "<br>";
+                
+                if ($exists) {
+                    // Get field list
+                    $fields = $db->getFieldNames($table);
+                    echo "Fields: " . implode(', ', $fields) . "<br>";
+                    
+                    // Get record count
+                    $count = $db->table($table)->countAllResults();
+                    echo "Records: {$count}<br>";
+                    
+                    // Show sample data
+                    if ($count > 0) {
+                        $sample = $db->table($table)->limit(1)->get()->getRowArray();
+                        echo "Sample: <pre>" . json_encode($sample, JSON_PRETTY_PRINT) . "</pre>";
+                    }
+                }
+                echo "<br>";
+            }
+            
+            echo '<br><a href="' . base_url('test') . '">← Back to Test</a>';
+            
+        } catch (\Exception $e) {
+            echo "❌ Error: " . $e->getMessage();
+            echo '<br><a href="' . base_url('test') . '">← Back to Test</a>';
+        }
     }
 }

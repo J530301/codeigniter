@@ -82,39 +82,44 @@ class UserController extends BaseController
         // Skip model validation since we're validating in the controller
         $this->billModel->skipValidation(true);
 
-        $insertResult = $this->billModel->insert($data);
-        
-        if ($insertResult) {
-            // Get the inserted bill ID
-            $billId = $this->billModel->getInsertID();
+        try {
+            $insertResult = $this->billModel->insert($data);
             
-            // Get the current user's information
-            $currentUser = $this->userModel->find(session()->get('user_id'));
-            $userName = $currentUser['first_name'] . ' ' . $currentUser['last_name'];
-            $itemName = $this->request->getPost('item_name');
-            $totalAmount = number_format($this->request->getPost('price') * $this->request->getPost('quantity'), 2);
-            
-            // Create notification for all admins
-            $admins = $this->userModel->where('role', 'admin')->findAll();
-            
-            foreach ($admins as $admin) {
-                $notificationData = [
-                    'user_id' => $admin['id'],
-                    'title' => 'New Bill Created',
-                    'message' => "User {$userName} has created a new bill (#{$billId}) for \"{$itemName}\" worth \${$totalAmount}. Please review and approve/reject the bill.",
-                    'type' => 'bill_created',
-                    'is_read' => 0
-                ];
+            if ($insertResult) {
+                // Get the inserted bill ID
+                $billId = $this->billModel->getInsertID();
                 
-                $this->notificationModel->skipValidation(true);
-                $this->notificationModel->insert($notificationData);
+                // Get the current user's information
+                $currentUser = $this->userModel->find(session()->get('user_id'));
+                $userName = $currentUser['first_name'] . ' ' . $currentUser['last_name'];
+                $itemName = $this->request->getPost('item_name');
+                $totalAmount = number_format($this->request->getPost('price') * $this->request->getPost('quantity'), 2);
+                
+                // Create notification for all admins
+                $admins = $this->userModel->where('role', 'admin')->findAll();
+                
+                foreach ($admins as $admin) {
+                    $notificationData = [
+                        'user_id' => $admin['id'],
+                        'title' => 'New Bill Created',
+                        'message' => "User {$userName} has created a new bill (#{$billId}) for \"{$itemName}\" worth \${$totalAmount}. Please review and approve/reject the bill.",
+                        'type' => 'bill_created',
+                        'is_read' => 0
+                    ];
+                    
+                    $this->notificationModel->skipValidation(true);
+                    $this->notificationModel->insert($notificationData);
+                }
+                
+                return redirect()->to(base_url('user/dashboard'))->with('success', 'Bill created successfully!');
+            } else {
+                // Log the error for debugging
+                log_message('error', 'Failed to insert bill: ' . json_encode($this->billModel->errors()));
+                return redirect()->back()->withInput()->with('error', 'Failed to create bill. Database error: ' . implode(', ', $this->billModel->errors()));
             }
-            
-            return redirect()->to('/user/dashboard')->with('success', 'Bill created successfully!');
-        } else {
-            // Log the error for debugging
-            log_message('error', 'Failed to insert bill: ' . json_encode($this->billModel->errors()));
-            return redirect()->back()->withInput()->with('error', 'Failed to create bill. Please try again.');
+        } catch (\Exception $e) {
+            log_message('error', 'Exception during bill creation: ' . $e->getMessage());
+            return redirect()->back()->withInput()->with('error', 'Failed to create bill. Error: ' . $e->getMessage());
         }
     }
 

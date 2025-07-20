@@ -31,7 +31,7 @@ class DatabaseController extends BaseController
                 user_id INTEGER NOT NULL,
                 item_name VARCHAR(255) NOT NULL,
                 description TEXT,
-                amount DECIMAL(10,2) NOT NULL,
+                price DECIMAL(10,2) NOT NULL,
                 quantity INTEGER DEFAULT 1,
                 total_amount DECIMAL(10,2) NOT NULL,
                 status VARCHAR(20) DEFAULT 'pending',

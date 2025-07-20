@@ -7,7 +7,7 @@
         <div class="px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16">
                 <div class="flex items-center">
-                    <a href="/user/dashboard" class="text-gray-600 hover:text-gray-800 mr-4">
+                    <a href="<?= base_url('user/dashboard') ?>" class="text-gray-600 hover:text-gray-800 mr-4">
                         <i class="fas fa-arrow-left text-xl"></i>
                     </a>
                     <h1 class="text-xl font-semibold text-gray-800"><?= $title ?></h1>
@@ -47,7 +47,7 @@
                     <p class="text-sm text-gray-600 mt-1">Fill out the form below to submit a new bill for approval</p>
                 </div>
                 
-                <form action="/user/store-bill" method="POST" class="p-6 space-y-6" id="billForm">
+                <form action="<?= base_url('user/store-bill') ?>" method="POST" class="p-6 space-y-6" id="billForm">
                     <div>
                         <label for="item_name" class="block text-sm font-medium text-gray-700">Item Name *</label>
                         <input type="text" 

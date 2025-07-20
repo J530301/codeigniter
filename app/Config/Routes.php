@@ -12,6 +12,7 @@ $routes->group('', ['namespace' => 'App\Controllers'], function($routes) {
     $routes->get('test', 'TestController::index');
     $routes->get('test/dbTest', 'TestController::dbTest');
     $routes->get('test/phpInfo', 'TestController::phpInfo');
+    $routes->get('test/checkTables', 'TestController::checkTables');
     
     // Database setup routes
     $routes->get('database/setup', 'DatabaseController::setup');
