@@ -71,23 +71,40 @@
             /* Ensure content extends beyond viewport */
             main {
                 min-height: calc(100vh - 4rem);
-                padding-bottom: 6rem !important;
-            }
-        }
-        
-        /* Extra mobile styles for very small screens */
-        @media (max-width: 480px) {
-            .main-content {
-                min-height: calc(100vh + 100px); /* Even more extra height */
-            }
-            
-            main {
                 padding-bottom: 8rem !important;
             }
             
             /* Add extra margin to Quick Actions on mobile */
             .quick-actions-mobile {
                 margin-bottom: 4rem !important;
+            }
+            
+            /* Force user page content to be scrollable */
+            .user-content {
+                padding-bottom: 10rem !important;
+                min-height: calc(100vh + 200px) !important;
+            }
+        }
+        
+        /* Extra mobile styles for very small screens */
+        @media (max-width: 480px) {
+            .main-content {
+                min-height: calc(100vh + 150px); /* Even more extra height */
+            }
+            
+            main {
+                padding-bottom: 10rem !important;
+            }
+            
+            /* Add extra margin to Quick Actions on mobile */
+            .quick-actions-mobile {
+                margin-bottom: 4rem !important;
+            }
+            
+            /* User pages need even more space on small screens */
+            .user-content {
+                padding-bottom: 12rem !important;
+                min-height: calc(100vh + 300px) !important;
             }
         }
         
@@ -129,6 +146,27 @@
         @supports (-webkit-touch-callout: none) {
             .main-content {
                 min-height: -webkit-fill-available;
+            }
+            
+            .user-content {
+                min-height: -webkit-fill-available;
+                padding-bottom: 15rem !important;
+            }
+            
+            /* iOS specific mobile scrolling fixes */
+            body {
+                position: relative;
+                overflow-x: hidden;
+            }
+        }
+        
+        /* Force scrollable area on all mobile devices */
+        @media screen and (max-width: 768px) {
+            .user-content::after {
+                content: '';
+                display: block;
+                height: 200px;
+                width: 1px;
             }
         }
     </style>
