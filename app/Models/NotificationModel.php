@@ -20,15 +20,15 @@ class NotificationModel extends Model
     protected $useTimestamps = true;
     protected $dateFormat    = 'datetime';
     protected $createdField  = 'created_at';
-    protected $updatedField  = 'updated_at';
+    protected $updatedField  = ''; // No updated_at column in table
 
     // Validation
     protected $validationRules = [
         'user_id' => 'required|integer',
         'title'   => 'required|min_length[3]|max_length[255]',
         'message' => 'required|min_length[3]',
-        'type'    => 'required|max_length[50]',
-        'is_read' => 'permit_empty|in_list[0,1]'
+        'type'    => 'permit_empty|max_length[50]',
+        'is_read' => 'permit_empty|in_list[0,1,false,true]'
     ];
 
     protected $validationMessages = [];
@@ -71,7 +71,7 @@ class NotificationModel extends Model
             'title'   => 'User Login',
             'message' => "User {$userFullName} has logged in",
             'type'    => 'login',
-            'is_read' => 0
+            'is_read' => false // Use boolean for PostgreSQL
         ]);
     }
 
@@ -82,7 +82,7 @@ class NotificationModel extends Model
             'title'   => 'New Bill Created',
             'message' => "New bill created: {$billData['customer_name']} - $" . number_format($billData['price'], 2),
             'type'    => 'bill',
-            'is_read' => 0
+            'is_read' => false // Use boolean for PostgreSQL
         ]);
     }
 
@@ -91,20 +91,37 @@ class NotificationModel extends Model
         // Log the data being inserted
         log_message('info', 'NotificationModel debugInsert data: ' . json_encode($data));
         
-        // Ensure proper data types
+        // Ensure proper data types for PostgreSQL
         if (isset($data['user_id'])) {
             $data['user_id'] = (int)$data['user_id'];
         }
         if (isset($data['is_read'])) {
-            $data['is_read'] = (int)$data['is_read'];
+            // Convert to boolean for PostgreSQL
+            $data['is_read'] = $data['is_read'] ? true : false;
         }
         
-        // Try insert with validation disabled first
+        // Try insert without validation first
         $this->skipValidation(true);
         $result = $this->insert($data);
         
         if (!$result) {
             log_message('error', 'NotificationModel insert failed: ' . json_encode($this->errors()));
+            
+            // Try raw SQL as fallback
+            $db = \Config\Database::connect();
+            $sql = "INSERT INTO notifications (user_id, title, message, type, is_read) VALUES (?, ?, ?, ?, ?)";
+            $rawResult = $db->query($sql, [
+                $data['user_id'],
+                $data['title'],
+                $data['message'],
+                $data['type'] ?? 'info',
+                $data['is_read'] ?? false
+            ]);
+            
+            if ($rawResult) {
+                log_message('info', 'Raw SQL fallback successful, ID: ' . $db->insertID());
+                return $db->insertID();
+            }
         }
         
         return $result;

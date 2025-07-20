@@ -48,9 +48,9 @@ class DiagnosticController extends Controller
             // 3. Test raw SQL insert
             echo '<h2>3. Raw SQL Insert Test</h2>';
             try {
-                $sql = "INSERT INTO notifications (user_id, title, message, type, is_read, created_at, updated_at) 
-                        VALUES (?, ?, ?, ?, ?, NOW(), NOW())";
-                $result = $db->query($sql, [1, 'Diagnostic Test', 'Raw SQL test at ' . date('Y-m-d H:i:s'), 'diagnostic', 0]);
+                $sql = "INSERT INTO notifications (user_id, title, message, type, is_read) 
+                        VALUES (?, ?, ?, ?, ?)";
+                $result = $db->query($sql, [1, 'Diagnostic Test', 'Raw SQL test at ' . date('Y-m-d H:i:s'), 'diagnostic', false]);
                 
                 if ($result) {
                     $insertId = $db->insertID();
@@ -102,13 +102,13 @@ class DiagnosticController extends Controller
                 }
                 
                 // Test 2: Full data with is_read
-                echo '<h3>Test 2: Full Data (with is_read)</h3>';
+                echo '<h3>Test 2: Full Data (with is_read boolean)</h3>';
                 $testData2 = [
                     'user_id' => 1,
                     'title' => 'Test 2',
-                    'message' => 'Full test with is_read',
+                    'message' => 'Full test with is_read boolean',
                     'type' => 'test',
-                    'is_read' => 0
+                    'is_read' => false // Use boolean
                 ];
                 
                 echo '<pre>Data: ' . json_encode($testData2, JSON_PRETTY_PRINT) . '</pre>';
@@ -133,7 +133,7 @@ class DiagnosticController extends Controller
                     'title' => 'Test 3',
                     'message' => 'Skip validation test',
                     'type' => 'test',
-                    'is_read' => 0
+                    'is_read' => false // Use boolean
                 ];
                 
                 echo '<pre>Data: ' . json_encode($testData3, JSON_PRETTY_PRINT) . '</pre>';

@@ -113,7 +113,7 @@ class UserController extends BaseController
                         'title' => 'New Bill Created',
                         'message' => "User {$userName} has created a new bill (#{$billId}) for \"{$itemName}\" worth \${$totalAmount}. Please review and approve/reject the bill.",
                         'type' => 'bill_created',
-                        'is_read' => 0 // Ensure integer
+                        'is_read' => false // Use boolean for PostgreSQL
                     ];
                     
                     log_message('info', 'Creating notification for admin ID: ' . $admin['id'] . ', Data: ' . json_encode($notificationData));
@@ -129,13 +129,13 @@ class UserController extends BaseController
                             
                             // Fallback to raw SQL with explicit timestamp
                             $db = \Config\Database::connect();
-                            $sql = "INSERT INTO notifications (user_id, title, message, type, is_read, created_at, updated_at) VALUES (?, ?, ?, ?, ?, NOW(), NOW())";
+                            $sql = "INSERT INTO notifications (user_id, title, message, type, is_read) VALUES (?, ?, ?, ?, ?)";
                             $rawResult = $db->query($sql, [
                                 $notificationData['user_id'],
                                 $notificationData['title'],
                                 $notificationData['message'],
                                 $notificationData['type'],
-                                $notificationData['is_read']
+                                false // Use boolean for PostgreSQL
                             ]);
                             
                             if ($rawResult) {

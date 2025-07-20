@@ -79,7 +79,7 @@ class AuthController extends BaseController
                         'title' => 'User Login',
                         'message' => "User {$fullName} has logged in",
                         'type' => 'login',
-                        'is_read' => 0 // Ensure integer
+                        'is_read' => false // Use boolean for PostgreSQL
                     ];
                     
                     try {
@@ -92,13 +92,13 @@ class AuthController extends BaseController
                             
                             // Fallback to raw SQL
                             $db = \Config\Database::connect();
-                            $sql = "INSERT INTO notifications (user_id, title, message, type, is_read, created_at, updated_at) VALUES (?, ?, ?, ?, ?, NOW(), NOW())";
+                            $sql = "INSERT INTO notifications (user_id, title, message, type, is_read) VALUES (?, ?, ?, ?, ?)";
                             $rawResult = $db->query($sql, [
                                 $notificationData['user_id'],
                                 $notificationData['title'],
                                 $notificationData['message'],
                                 $notificationData['type'],
-                                $notificationData['is_read']
+                                false // Use boolean for PostgreSQL
                             ]);
                             
                             if ($rawResult) {
